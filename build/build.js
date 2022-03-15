@@ -1,16 +1,71 @@
 var gui = new dat.GUI();
 var params = {
-    Ellipse_Size: 30,
+    Seed: 1,
     Download_Image: function () { return save(); },
 };
-gui.add(params, "Ellipse_Size", 0, 100, 1);
+gui.add(params, "Seed", 1, 50, 1);
 gui.add(params, "Download_Image");
+var PADDING = 10;
+var LINES_NB = 100;
+var MAX_NORM = 200;
+var current;
+var configuration;
+var repetition = false;
+var repetitionProbability = 1;
 function draw() {
-    background(0);
-    ellipse(mouseX, mouseY, params.Ellipse_Size);
+    randomSeed(params.Seed);
+}
+function drawLines(newVector) {
+    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
 }
 function setup() {
     p6_CreateCanvas();
+    current = createVector(random(PADDING, width - PADDING), random(PADDING, height - PADDING));
+    background("white");
+    for (var i = 0; i < LINES_NB; i++) {
+        var norm_1 = 10 * floor(random(0, MAX_NORM) / 10);
+        var xRandom = floor(random(0, 3));
+        var yRandom = floor(random(0, 3));
+        var xNewVector = void 0, yNewVector = void 0;
+        switch (xRandom) {
+            case 0:
+                xNewVector = -1 * norm_1;
+                break;
+            case 1:
+                xNewVector = 0;
+                break;
+            case 2:
+                xNewVector = norm_1;
+                break;
+        }
+        switch (yRandom) {
+            case 0:
+                yNewVector = -1 * norm_1;
+                break;
+            case 1:
+                yNewVector = 0;
+                break;
+            case 2:
+                yNewVector = norm_1;
+                break;
+        }
+        var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+        if (futureVectorCopy.x < PADDING) {
+            xNewVector = abs(xNewVector);
+        }
+        else if (futureVectorCopy.x > width - PADDING) {
+            xNewVector = -xNewVector;
+        }
+        if (futureVectorCopy.y < PADDING) {
+            yNewVector = abs(yNewVector);
+        }
+        else if (futureVectorCopy.y > height - PADDING) {
+            yNewVector = -yNewVector;
+        }
+        var newVector = createVector(xNewVector, yNewVector);
+        drawLines(newVector);
+        current.add(newVector);
+    }
 }
 function windowResized() {
     p6_ResizeCanvas();
