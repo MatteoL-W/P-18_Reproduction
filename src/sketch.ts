@@ -74,6 +74,7 @@ function setup() {
                 break;
         }
 
+        // Avoid drawing outside the frame
         let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
         if (futureVectorCopy.x < PADDING) {
             xNewVector = abs(xNewVector)
@@ -86,6 +87,7 @@ function setup() {
             yNewVector = -yNewVector
         }
 
+        // Draw the lines
         let newVector = createVector(xNewVector, yNewVector)
 
         drawLines(newVector)
