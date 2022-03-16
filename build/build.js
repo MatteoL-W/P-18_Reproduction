@@ -117,7 +117,8 @@ function setup() {
             if (xNewVector === yNewVector && yNewVector === 0) {
                 i--;
             }
-            if (randomRun < 1) {
+            console.log(randomRun);
+            if (randomRun < 0.3) {
                 repetition = true;
                 repetitionProbability = 1;
                 iterationRepetition = 0;
