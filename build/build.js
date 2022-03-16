@@ -12,6 +12,8 @@ var current;
 var configuration;
 var repetition = false;
 var repetitionProbability = 1;
+var iterationRepetition = 0;
+var randomNorm;
 function draw() {
     randomSeed(params.Seed);
 }
@@ -23,48 +25,107 @@ function setup() {
     current = createVector(random(PADDING, width - PADDING), random(PADDING, height - PADDING));
     background("white");
     for (var i = 0; i < LINES_NB; i++) {
-        var norm_1 = 10 * floor(random(0, MAX_NORM) / 10);
-        var xRandom = floor(random(0, 3));
-        var yRandom = floor(random(0, 3));
-        var xNewVector = void 0, yNewVector = void 0;
-        switch (xRandom) {
-            case 0:
-                xNewVector = -1 * norm_1;
-                break;
-            case 1:
+        var randomRun = random(0, 1);
+        if (repetition && randomRun < repetitionProbability) {
+            var xNewVector = void 0, yNewVector = void 0;
+            if (configuration === 'horizontal') {
+                var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
                 xNewVector = 0;
-                break;
-            case 2:
-                xNewVector = norm_1;
-                break;
-        }
-        switch (yRandom) {
-            case 0:
-                yNewVector = -1 * norm_1;
-                break;
-            case 1:
+                yNewVector = operator * randomNorm;
+                configuration = 'vertical';
+            }
+            else if (configuration === 'vertical') {
+                var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
+                xNewVector = -operator * randomNorm;
                 yNewVector = 0;
-                break;
-            case 2:
-                yNewVector = norm_1;
-                break;
+                configuration = 'horizontal';
+            }
+            else if (configuration === 'oblique') {
+                var operator = (iterationRepetition % 2 == 0) ? 1 : -1;
+                xNewVector = -operator * randomNorm;
+                yNewVector = -randomNorm;
+            }
+            repetitionProbability -= .2;
+            iterationRepetition++;
+            var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+            if (futureVectorCopy.x < PADDING) {
+                xNewVector = abs(xNewVector);
+            }
+            else if (futureVectorCopy.x > width - PADDING) {
+                xNewVector = -xNewVector;
+            }
+            if (futureVectorCopy.y < PADDING) {
+                yNewVector = abs(yNewVector);
+            }
+            else if (futureVectorCopy.y > height - PADDING) {
+                yNewVector = -yNewVector;
+            }
+            var newVector = createVector(xNewVector, yNewVector);
+            drawLines(newVector);
+            current.add(newVector);
         }
-        var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-        if (futureVectorCopy.x < PADDING) {
-            xNewVector = abs(xNewVector);
+        else {
+            randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
+            repetition = false;
+            var xRandom = floor(random(0, 3));
+            var yRandom = floor(random(0, 3));
+            var xNewVector = void 0, yNewVector = void 0;
+            switch (xRandom) {
+                case 0:
+                    xNewVector = -1 * randomNorm;
+                    break;
+                case 1:
+                    xNewVector = 0;
+                    break;
+                case 2:
+                    xNewVector = randomNorm;
+                    break;
+            }
+            switch (yRandom) {
+                case 0:
+                    yNewVector = -1 * randomNorm;
+                    break;
+                case 1:
+                    yNewVector = 0;
+                    break;
+                case 2:
+                    yNewVector = randomNorm;
+                    break;
+            }
+            var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+            if (futureVectorCopy.x < PADDING) {
+                xNewVector = abs(xNewVector);
+            }
+            else if (futureVectorCopy.x > width - PADDING) {
+                xNewVector = -xNewVector;
+            }
+            if (futureVectorCopy.y < PADDING) {
+                yNewVector = abs(yNewVector);
+            }
+            else if (futureVectorCopy.y > height - PADDING) {
+                yNewVector = -yNewVector;
+            }
+            if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
+                configuration = 'oblique';
+            }
+            else if (xNewVector === 0 && yNewVector != 0) {
+                configuration = 'vertical';
+            }
+            else if (yNewVector === 0 && xNewVector != 0) {
+                configuration = 'horizontal';
+            }
+            if (xNewVector === yNewVector && yNewVector === 0) {
+                i--;
+            }
+            if (randomRun < 1) {
+                repetition = true;
+                repetitionProbability = 1;
+                iterationRepetition = 0;
+            }
+            var newVector = createVector(xNewVector, yNewVector);
+            drawLines(newVector);
+            current.add(newVector);
         }
-        else if (futureVectorCopy.x > width - PADDING) {
-            xNewVector = -xNewVector;
-        }
-        if (futureVectorCopy.y < PADDING) {
-            yNewVector = abs(yNewVector);
-        }
-        else if (futureVectorCopy.y > height - PADDING) {
-            yNewVector = -yNewVector;
-        }
-        var newVector = createVector(xNewVector, yNewVector);
-        drawLines(newVector);
-        current.add(newVector);
     }
 }
 function windowResized() {
