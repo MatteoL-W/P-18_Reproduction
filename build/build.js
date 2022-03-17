@@ -19,15 +19,32 @@ function draw() {
 }
 function drawLines(newVector) {
     line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
+    current.add(newVector);
+}
+function avoidOutOfGrid(xNewVector, yNewVector) {
+    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+    if (futureVectorCopy.x < PADDING) {
+        xNewVector = abs(xNewVector);
+    }
+    else if (futureVectorCopy.x > width - PADDING) {
+        xNewVector = -xNewVector;
+    }
+    if (futureVectorCopy.y < PADDING) {
+        yNewVector = abs(yNewVector);
+    }
+    else if (futureVectorCopy.y > height - PADDING) {
+        yNewVector = -yNewVector;
+    }
+    return { xNewVector: xNewVector, yNewVector: yNewVector };
 }
 function setup() {
     p6_CreateCanvas();
     current = createVector(random(PADDING, width - PADDING), random(PADDING, height - PADDING));
     background("white");
     for (var i = 0; i < LINES_NB; i++) {
+        var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
         if (repetition && randomRun < repetitionProbability) {
-            var xNewVector = void 0, yNewVector = void 0;
             if (configuration === 'horizontal') {
                 var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
                 xNewVector = 0;
@@ -42,34 +59,19 @@ function setup() {
             }
             else if (configuration === 'oblique') {
                 var operator = (iterationRepetition % 2 == 0) ? 1 : -1;
-                xNewVector = -operator * randomNorm;
-                yNewVector = -randomNorm;
+                xNewVector = operator * randomNorm;
+                yNewVector = randomNorm;
             }
             repetitionProbability -= .2;
             iterationRepetition++;
-            var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-            if (futureVectorCopy.x < PADDING) {
-                xNewVector = abs(xNewVector);
-            }
-            else if (futureVectorCopy.x > width - PADDING) {
-                xNewVector = -xNewVector;
-            }
-            if (futureVectorCopy.y < PADDING) {
-                yNewVector = abs(yNewVector);
-            }
-            else if (futureVectorCopy.y > height - PADDING) {
-                yNewVector = -yNewVector;
-            }
-            var newVector = createVector(xNewVector, yNewVector);
-            drawLines(newVector);
-            current.add(newVector);
+            var inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
+            drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector));
         }
         else {
             randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
             repetition = false;
             var xRandom = floor(random(0, 3));
             var yRandom = floor(random(0, 3));
-            var xNewVector = void 0, yNewVector = void 0;
             switch (xRandom) {
                 case 0:
                     xNewVector = -1 * randomNorm;
@@ -92,19 +94,9 @@ function setup() {
                     yNewVector = randomNorm;
                     break;
             }
-            var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-            if (futureVectorCopy.x < PADDING) {
-                xNewVector = abs(xNewVector);
-            }
-            else if (futureVectorCopy.x > width - PADDING) {
-                xNewVector = -xNewVector;
-            }
-            if (futureVectorCopy.y < PADDING) {
-                yNewVector = abs(yNewVector);
-            }
-            else if (futureVectorCopy.y > height - PADDING) {
-                yNewVector = -yNewVector;
-            }
+            var inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
+            xNewVector = inGridVector.xNewVector;
+            yNewVector = inGridVector.yNewVector;
             if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
                 configuration = 'oblique';
             }
@@ -117,15 +109,12 @@ function setup() {
             if (xNewVector === yNewVector && yNewVector === 0) {
                 i--;
             }
-            console.log(randomRun);
             if (randomRun < 0.3) {
                 repetition = true;
                 repetitionProbability = 1;
                 iterationRepetition = 0;
             }
-            var newVector = createVector(xNewVector, yNewVector);
-            drawLines(newVector);
-            current.add(newVector);
+            drawLines(createVector(xNewVector, yNewVector));
         }
     }
 }
