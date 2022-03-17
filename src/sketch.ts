@@ -72,18 +72,22 @@ function setup() {
         let randomRun = random(0, 1);
 
         if (repetition && randomRun < repetitionProbability) {
+            let operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
+
             if (configuration === 'horizontal') {
-                let operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
                 xNewVector = 0;
                 yNewVector = operator * randomNorm;
                 configuration = 'vertical';
-            } else if (configuration === 'vertical') {
-                let operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
+            }
+
+            else if (configuration === 'vertical') {
                 xNewVector = -operator * randomNorm;
                 yNewVector = 0;
                 configuration = 'horizontal'
-            } else if (configuration === 'oblique') {
-                let operator = (iterationRepetition % 2 == 0) ? 1 : -1;
+            }
+
+            else if (configuration === 'oblique') {
+                operator = (iterationRepetition % 2 == 0) ? 1 : -1;
                 xNewVector = operator * randomNorm;
                 yNewVector = randomNorm;
             }
@@ -95,6 +99,7 @@ function setup() {
 
             drawLines(createVector(inGridVector.xNewVector,inGridVector.yNewVector))
         } else {
+            // Only multiplier of 20 to have a structure
             randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
             repetition = false;
 

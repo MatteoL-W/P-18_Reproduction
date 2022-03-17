@@ -45,20 +45,19 @@ function setup() {
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
         if (repetition && randomRun < repetitionProbability) {
+            var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
             if (configuration === 'horizontal') {
-                var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
                 xNewVector = 0;
                 yNewVector = operator * randomNorm;
                 configuration = 'vertical';
             }
             else if (configuration === 'vertical') {
-                var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
                 xNewVector = -operator * randomNorm;
                 yNewVector = 0;
                 configuration = 'horizontal';
             }
             else if (configuration === 'oblique') {
-                var operator = (iterationRepetition % 2 == 0) ? 1 : -1;
+                operator = (iterationRepetition % 2 == 0) ? 1 : -1;
                 xNewVector = operator * randomNorm;
                 yNewVector = randomNorm;
             }
