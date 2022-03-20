@@ -20,6 +20,17 @@ let current;
 //       Drawing
 // -------------------
 
+function checkConfiguration(xNewVector, yNewVector, configuration) {
+    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
+        configuration = 'oblique';
+    } else if (xNewVector === 0 && yNewVector != 0) {
+        configuration = 'vertical';
+    } else if (yNewVector === 0 && xNewVector != 0) {
+        configuration = 'horizontal';
+    }
+    return configuration;
+}
+
 function draw() {
     randomSeed(params.Seed)
     background("white")
@@ -40,6 +51,7 @@ function draw() {
         let randomRun = random(0, 1);
 
         if (repetition && randomRun < repetitionProbability) {
+            // Génère l'opérateur (1 ou -1) pour le "rempart" (succession de horizontal / vertical)
             let operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
 
             if (configuration === 'horizontal') {
@@ -55,6 +67,7 @@ function draw() {
             }
 
             else if (configuration === 'oblique') {
+                // Génère l'opérateur pour les dents (zigzag)
                 operator = (iterationRepetition % 2 == 0) ? 1 : -1;
                 xNewVector = operator * randomNorm;
                 yNewVector = randomNorm;
@@ -104,14 +117,7 @@ function draw() {
             xNewVector = inGridVector.xNewVector;
             yNewVector = inGridVector.yNewVector;
 
-            // Check configuration
-            if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
-                configuration = 'oblique';
-            } else if (xNewVector === 0 && yNewVector != 0) {
-                configuration = 'vertical';
-            } else if (yNewVector === 0 && xNewVector != 0) {
-                configuration = 'horizontal';
-            }
+            configuration = checkConfiguration(xNewVector, yNewVector, configuration);
 
             // If the new vector is equal to 0
             if (xNewVector === yNewVector && yNewVector === 0) {

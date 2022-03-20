@@ -9,6 +9,18 @@ var PADDING = 10;
 var LINES_NB = 100;
 var MAX_NORM = 200;
 var current;
+function checkConfiguration(xNewVector, yNewVector, configuration) {
+    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
+        configuration = 'oblique';
+    }
+    else if (xNewVector === 0 && yNewVector != 0) {
+        configuration = 'vertical';
+    }
+    else if (yNewVector === 0 && xNewVector != 0) {
+        configuration = 'horizontal';
+    }
+    return configuration;
+}
 function draw() {
     randomSeed(params.Seed);
     background("white");
@@ -73,15 +85,7 @@ function draw() {
             var inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
             xNewVector = inGridVector.xNewVector;
             yNewVector = inGridVector.yNewVector;
-            if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
-                configuration = 'oblique';
-            }
-            else if (xNewVector === 0 && yNewVector != 0) {
-                configuration = 'vertical';
-            }
-            else if (yNewVector === 0 && xNewVector != 0) {
-                configuration = 'horizontal';
-            }
+            configuration = checkConfiguration(xNewVector, yNewVector, configuration);
             if (xNewVector === yNewVector && yNewVector === 0) {
                 i--;
             }
