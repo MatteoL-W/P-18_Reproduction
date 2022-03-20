@@ -15,11 +15,6 @@ const LINES_NB = 100;
 const MAX_NORM = 200;
 
 let current;
-let configuration;
-let repetition = false;
-let repetitionProbability = 1;
-let iterationRepetition = 0;
-let randomNorm;
 
 // -------------------
 //       Drawing
@@ -27,46 +22,19 @@ let randomNorm;
 
 function draw() {
     randomSeed(params.Seed)
-}
+    background("white")
 
-function drawLines(newVector) {
-    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
-    current.add(newVector);
-}
-
-// -------------------
-//    Initialization
-// -------------------
-
-function avoidOutOfGrid(xNewVector, yNewVector) {
-    let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-
-    if (futureVectorCopy.x < PADDING) {
-        xNewVector = abs(xNewVector)
-    } else if (futureVectorCopy.x > width - PADDING) {
-        xNewVector = -xNewVector
-    }
-
-    if (futureVectorCopy.y < PADDING) {
-        yNewVector = abs(yNewVector)
-    } else if (futureVectorCopy.y > height - PADDING) {
-        yNewVector = -yNewVector
-    }
-
-    return {xNewVector, yNewVector};
-}
-
-function setup() {
-    p6_CreateCanvas()
+    let configuration;
+    let repetition = false;
+    let repetitionProbability = 1;
+    let iterationRepetition = 0;
+    let randomNorm;
 
     current = createVector(
         random(PADDING, width - PADDING),
         random(PADDING, height - PADDING)
     )
 
-    background("white")
-
-    // Décaler tout ça dans draw (et trouver solution pour random)
     for (let i = 0; i < LINES_NB; i++) {
         let xNewVector, yNewVector;
         let randomRun = random(0, 1);
@@ -98,7 +66,9 @@ function setup() {
             const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
 
             drawLines(createVector(inGridVector.xNewVector,inGridVector.yNewVector))
-        } else {
+        }
+
+        else {
             // Only multiplier of 20 to have a structure
             randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
             repetition = false;
@@ -159,6 +129,37 @@ function setup() {
         }
 
     }
+}
+
+function drawLines(newVector) {
+    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
+    current.add(newVector);
+}
+
+function avoidOutOfGrid(xNewVector, yNewVector) {
+    let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+
+    if (futureVectorCopy.x < PADDING) {
+        xNewVector = abs(xNewVector)
+    } else if (futureVectorCopy.x > width - PADDING) {
+        xNewVector = -xNewVector
+    }
+
+    if (futureVectorCopy.y < PADDING) {
+        yNewVector = abs(yNewVector)
+    } else if (futureVectorCopy.y > height - PADDING) {
+        yNewVector = -yNewVector
+    }
+
+    return {xNewVector, yNewVector};
+}
+
+// -------------------
+//    Initialization
+// -------------------
+
+function setup() {
+    p6_CreateCanvas()
 }
 
 function windowResized() {

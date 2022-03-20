@@ -9,38 +9,15 @@ var PADDING = 10;
 var LINES_NB = 100;
 var MAX_NORM = 200;
 var current;
-var configuration;
-var repetition = false;
-var repetitionProbability = 1;
-var iterationRepetition = 0;
-var randomNorm;
 function draw() {
     randomSeed(params.Seed);
-}
-function drawLines(newVector) {
-    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
-    current.add(newVector);
-}
-function avoidOutOfGrid(xNewVector, yNewVector) {
-    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-    if (futureVectorCopy.x < PADDING) {
-        xNewVector = abs(xNewVector);
-    }
-    else if (futureVectorCopy.x > width - PADDING) {
-        xNewVector = -xNewVector;
-    }
-    if (futureVectorCopy.y < PADDING) {
-        yNewVector = abs(yNewVector);
-    }
-    else if (futureVectorCopy.y > height - PADDING) {
-        yNewVector = -yNewVector;
-    }
-    return { xNewVector: xNewVector, yNewVector: yNewVector };
-}
-function setup() {
-    p6_CreateCanvas();
-    current = createVector(random(PADDING, width - PADDING), random(PADDING, height - PADDING));
     background("white");
+    var configuration;
+    var repetition = false;
+    var repetitionProbability = 1;
+    var iterationRepetition = 0;
+    var randomNorm;
+    current = createVector(random(PADDING, width - PADDING), random(PADDING, height - PADDING));
     for (var i = 0; i < LINES_NB; i++) {
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
@@ -116,6 +93,29 @@ function setup() {
             drawLines(createVector(xNewVector, yNewVector));
         }
     }
+}
+function drawLines(newVector) {
+    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
+    current.add(newVector);
+}
+function avoidOutOfGrid(xNewVector, yNewVector) {
+    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+    if (futureVectorCopy.x < PADDING) {
+        xNewVector = abs(xNewVector);
+    }
+    else if (futureVectorCopy.x > width - PADDING) {
+        xNewVector = -xNewVector;
+    }
+    if (futureVectorCopy.y < PADDING) {
+        yNewVector = abs(yNewVector);
+    }
+    else if (futureVectorCopy.y > height - PADDING) {
+        yNewVector = -yNewVector;
+    }
+    return { xNewVector: xNewVector, yNewVector: yNewVector };
+}
+function setup() {
+    p6_CreateCanvas();
 }
 function windowResized() {
     p6_ResizeCanvas();
