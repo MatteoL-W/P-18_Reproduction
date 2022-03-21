@@ -15,6 +15,38 @@ const LINES_NB = 100;
 const MAX_NORM = 200;
 
 let current;
+var plotter;
+
+class Plotter 
+{
+    x : number;
+    y : number;
+    deltaX : number;
+    deltaY : number;
+
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.deltaX = 0;
+        this.deltaY = 0;
+    }
+    
+    render() {
+        line (this.x,this.y+5,this.x,this.y-5);
+    }
+
+    step (newVector) {
+      for (let i=0;i<newVector.mag();i++)
+        {
+            this.render();
+            
+            this.x+=this.deltaX;
+            this.y+=this.deltaY;
+            this.x = constrain(this.x, 80, width - 80);
+            this.y = constrain(this.y, 80, height - 80);          
+        }
+    }
+}
 
 // -------------------
 //       Drawing
@@ -138,7 +170,19 @@ function draw() {
 }
 
 function drawLines(newVector) {
-    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
+    plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x))/newVector.x;
+    plotter.deltaY = (newVector.y === 0) ? 0 : (abs(newVector.y))/newVector.y;
+
+    console.log("vector.x : "+newVector.x)
+    console.log("vector.y : "+newVector.y)
+
+    console.log(plotter.deltaX);
+    console.log(plotter.deltaY);
+    plotter.x=current.x;
+    plotter.y=current.y;
+    plotter.step(newVector);
+
+    //line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
     current.add(newVector);
 }
 
@@ -165,7 +209,9 @@ function avoidOutOfGrid(xNewVector, yNewVector) {
 // -------------------
 
 function setup() {
-    p6_CreateCanvas()
+    p6_CreateCanvas();
+    plotter = new Plotter();
+    frameRate(1);
 }
 
 function windowResized() {

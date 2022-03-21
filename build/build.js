@@ -9,6 +9,28 @@ var PADDING = 10;
 var LINES_NB = 100;
 var MAX_NORM = 200;
 var current;
+var plotter;
+var Plotter = (function () {
+    function Plotter() {
+        this.x = 0;
+        this.y = 0;
+        this.deltaX = 0;
+        this.deltaY = 0;
+    }
+    Plotter.prototype.render = function () {
+        line(this.x, this.y + 5, this.x, this.y - 5);
+    };
+    Plotter.prototype.step = function (newVector) {
+        for (var i = 0; i < newVector.mag(); i++) {
+            this.render();
+            this.x += this.deltaX;
+            this.y += this.deltaY;
+            this.x = constrain(this.x, 80, width - 80);
+            this.y = constrain(this.y, 80, height - 80);
+        }
+    };
+    return Plotter;
+}());
 function checkConfiguration(xNewVector, yNewVector, configuration) {
     if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
         configuration = 'oblique';
@@ -99,7 +121,15 @@ function draw() {
     }
 }
 function drawLines(newVector) {
-    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
+    plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x)) / newVector.x;
+    plotter.deltaY = (newVector.y === 0) ? 0 : (abs(newVector.y)) / newVector.y;
+    console.log("vector.x : " + newVector.x);
+    console.log("vector.y : " + newVector.y);
+    console.log(plotter.deltaX);
+    console.log(plotter.deltaY);
+    plotter.x = current.x;
+    plotter.y = current.y;
+    plotter.step(newVector);
     current.add(newVector);
 }
 function avoidOutOfGrid(xNewVector, yNewVector) {
@@ -120,6 +150,8 @@ function avoidOutOfGrid(xNewVector, yNewVector) {
 }
 function setup() {
     p6_CreateCanvas();
+    plotter = new Plotter();
+    frameRate(1);
 }
 function windowResized() {
     p6_ResizeCanvas();
