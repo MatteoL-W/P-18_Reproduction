@@ -5,15 +5,18 @@
 const gui = new dat.GUI()
 const params = {
     Seed: 1,
+    Lines_nb: 100,
+    Multipliers: 20,
+    Max_norm: 200,
     Download_Image: () => save(),
 }
 gui.add(params, "Seed", 1, 50, 1)
+gui.add(params, "Lines_nb", 10, 200, 10)
+gui.add(params, "Multipliers", 1, 30, 1)
+gui.add(params, "Max_norm", 10, 250, 10)
 gui.add(params, "Download_Image")
 
 const PADDING = 10;
-const LINES_NB = 20;
-const MAX_NORM = 200;
-const MULTIPLIERS = 20;
 
 let current;
 let plotter;
@@ -68,7 +71,7 @@ function draw() {
         random(PADDING, height - PADDING)
     )
 
-    for (let i = 0; i < LINES_NB; i++) {
+    for (let i = 0; i < params.Lines_nb; i++) {
         let xNewVector, yNewVector;
         let randomRun = random(0, 1);
 
@@ -99,7 +102,7 @@ function draw() {
             drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector))
         } else {
             // Only multiplier of MULTIPLIERS to have a structure
-            randomNorm = MULTIPLIERS * floor(random(0, MAX_NORM) / MULTIPLIERS);
+            randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
             repetition = false;
 
             let xNewVector = random([-1 * randomNorm, 0, randomNorm]);

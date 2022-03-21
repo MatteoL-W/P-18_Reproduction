@@ -1,14 +1,17 @@
 var gui = new dat.GUI();
 var params = {
     Seed: 1,
+    Lines_nb: 100,
+    Multipliers: 20,
+    Max_norm: 200,
     Download_Image: function () { return save(); },
 };
 gui.add(params, "Seed", 1, 50, 1);
+gui.add(params, "Lines_nb", 10, 200, 10);
+gui.add(params, "Multipliers", 1, 30, 1);
+gui.add(params, "Max_norm", 10, 250, 10);
 gui.add(params, "Download_Image");
 var PADDING = 10;
-var LINES_NB = 20;
-var MAX_NORM = 200;
-var MULTIPLIERS = 20;
 var current;
 var plotter;
 var Plotter = (function () {
@@ -41,7 +44,7 @@ function draw() {
     var iterationRepetition = 0;
     var randomNorm;
     current = createVector(random(PADDING, width - PADDING), random(PADDING, height - PADDING));
-    for (var i = 0; i < LINES_NB; i++) {
+    for (var i = 0; i < params.Lines_nb; i++) {
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
         if (repetition && randomRun < repetitionProbability) {
@@ -67,7 +70,7 @@ function draw() {
             drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector));
         }
         else {
-            randomNorm = MULTIPLIERS * floor(random(0, MAX_NORM) / MULTIPLIERS);
+            randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
             repetition = false;
             var xNewVector_1 = random([-1 * randomNorm, 0, randomNorm]);
             var yNewVector_1 = random([-1 * randomNorm, 0, randomNorm]);
