@@ -36,10 +36,10 @@ class Plotter
     }
 
     step (newVector) {
-      for (let i=0;i<newVector.mag();i++)
+      for (let i=0;i<newVector.mag()*2;i++)
         {
-            this.x+=this.deltaX;
-            this.y+=this.deltaY;
+            this.x+=this.deltaX/2;
+            this.y+=this.deltaY/2;
             this.x = constrain(this.x, 80, width - 80);
             this.y = constrain(this.y, 80, height - 80);
 

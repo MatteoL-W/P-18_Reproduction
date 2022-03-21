@@ -21,9 +21,9 @@ var Plotter = (function () {
         line(this.x, this.y + 5, this.x, this.y - 5);
     };
     Plotter.prototype.step = function (newVector) {
-        for (var i = 0; i < newVector.mag(); i++) {
-            this.x += this.deltaX;
-            this.y += this.deltaY;
+        for (var i = 0; i < newVector.mag() * 2; i++) {
+            this.x += this.deltaX / 2;
+            this.y += this.deltaY / 2;
             this.x = constrain(this.x, 80, width - 80);
             this.y = constrain(this.y, 80, height - 80);
             this.render();
