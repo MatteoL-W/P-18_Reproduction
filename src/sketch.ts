@@ -15,7 +15,7 @@ const LINES_NB = 100;
 const MAX_NORM = 200;
 
 let current;
-var plotter;
+let plotter;
 
 class Plotter 
 {
@@ -38,12 +38,12 @@ class Plotter
     step (newVector) {
       for (let i=0;i<newVector.mag();i++)
         {
-            this.render();
-            
             this.x+=this.deltaX;
             this.y+=this.deltaY;
             this.x = constrain(this.x, 80, width - 80);
-            this.y = constrain(this.y, 80, height - 80);          
+            this.y = constrain(this.y, 80, height - 80);
+
+            this.render();
         }
     }
 }

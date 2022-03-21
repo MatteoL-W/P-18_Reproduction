@@ -22,11 +22,11 @@ var Plotter = (function () {
     };
     Plotter.prototype.step = function (newVector) {
         for (var i = 0; i < newVector.mag(); i++) {
-            this.render();
             this.x += this.deltaX;
             this.y += this.deltaY;
             this.x = constrain(this.x, 80, width - 80);
             this.y = constrain(this.y, 80, height - 80);
+            this.render();
         }
     };
     return Plotter;
