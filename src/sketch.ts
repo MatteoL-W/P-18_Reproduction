@@ -11,18 +11,20 @@ gui.add(params, "Seed", 1, 50, 1)
 gui.add(params, "Download_Image")
 
 const PADDING = 10;
-const LINES_NB = 100;
+const LINES_NB = 20;
 const MAX_NORM = 200;
+const MULTIPLIERS = 20;
 
 let current;
 let plotter;
 
-class Plotter 
-{
-    x : number;
-    y : number;
-    deltaX : number;
-    deltaY : number;
+// Class
+
+class Plotter {
+    x: number;
+    y: number;
+    deltaX: number;
+    deltaY: number;
 
     constructor() {
         this.x = 0;
@@ -30,16 +32,15 @@ class Plotter
         this.deltaX = 0;
         this.deltaY = 0;
     }
-    
+
     render() {
-        line (this.x,this.y+5,this.x,this.y-5);
+        line(this.x, this.y + 5, this.x, this.y - 5);
     }
 
-    step (newVector) {
-      for (let i=0;i<newVector.mag()*2;i++)
-        {
-            this.x+=this.deltaX/2;
-            this.y+=this.deltaY/2;
+    step(newVector) {
+        for (let i = 0; i < newVector.mag() * 2; i++) {
+            this.x += this.deltaX / 2;
+            this.y += this.deltaY / 2;
             this.x = constrain(this.x, 80, width - 80);
             this.y = constrain(this.y, 80, height - 80);
 
@@ -51,17 +52,6 @@ class Plotter
 // -------------------
 //       Drawing
 // -------------------
-
-function checkConfiguration(xNewVector, yNewVector, configuration) {
-    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
-        configuration = 'oblique';
-    } else if (xNewVector === 0 && yNewVector != 0) {
-        configuration = 'vertical';
-    } else if (yNewVector === 0 && xNewVector != 0) {
-        configuration = 'horizontal';
-    }
-    return configuration;
-}
 
 function draw() {
     randomSeed(params.Seed)
@@ -90,15 +80,11 @@ function draw() {
                 xNewVector = 0;
                 yNewVector = operator * randomNorm;
                 configuration = 'vertical';
-            }
-
-            else if (configuration === 'vertical') {
+            } else if (configuration === 'vertical') {
                 xNewVector = -operator * randomNorm;
                 yNewVector = 0;
                 configuration = 'horizontal'
-            }
-
-            else if (configuration === 'oblique') {
+            } else if (configuration === 'oblique') {
                 // Génère l'opérateur pour les dents (zigzag)
                 operator = (iterationRepetition % 2 == 0) ? 1 : -1;
                 xNewVector = operator * randomNorm;
@@ -110,79 +96,50 @@ function draw() {
 
             const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
 
-            drawLines(createVector(inGridVector.xNewVector,inGridVector.yNewVector))
-        }
-
-        else {
-            // Only multiplier of 20 to have a structure
-            randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
+            drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector))
+        } else {
+            // Only multiplier of MULTIPLIERS to have a structure
+            randomNorm = MULTIPLIERS * floor(random(0, MAX_NORM) / MULTIPLIERS);
             repetition = false;
 
-            let xRandom = floor(random(0, 3));
-            let yRandom = floor(random(0, 3));
-
-            switch (xRandom) {
-                case 0:
-                    xNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    xNewVector = 0;
-                    break;
-                case 2:
-                    xNewVector = randomNorm;
-                    break;
-            }
-
-            switch (yRandom) {
-                case 0:
-                    yNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    yNewVector = 0;
-                    break;
-                case 2:
-                    yNewVector = randomNorm;
-                    break;
-            }
+            let xNewVector = random([-1 * randomNorm, 0, randomNorm]);
+            let yNewVector = random([-1 * randomNorm, 0, randomNorm]);
 
             const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
             xNewVector = inGridVector.xNewVector;
             yNewVector = inGridVector.yNewVector;
 
-            configuration = checkConfiguration(xNewVector, yNewVector, configuration);
+            configuration = setConfiguration(xNewVector, yNewVector, configuration);
 
             // If the new vector is equal to 0
             if (xNewVector === yNewVector && yNewVector === 0) {
                 i--;
             }
+            // faudra probablement mettre l'interdiction du nouveau vecteur inverse dans un else if ici
 
-            // Activate the repetition parameter
-            if (randomRun < 0.3) {
-                repetition = true;
-                repetitionProbability = 1;
-                iterationRepetition = 0;
+            // Draw the lines only if the xNewVector is new
+            else {
+                // Activate the repetition parameter
+                if (randomRun < 0.3) {
+                    repetition = true;
+                    repetitionProbability = 1;
+                    iterationRepetition = 0;
+                }
+
+                drawLines(createVector(xNewVector, yNewVector))
             }
-
-            drawLines(createVector(xNewVector, yNewVector))
         }
-
     }
 }
 
 function drawLines(newVector) {
-    plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x))/newVector.x;
-    plotter.deltaY = (newVector.y === 0) ? 0 : (abs(newVector.y))/newVector.y;
+    plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x)) / newVector.x;
+    plotter.deltaY = (newVector.y === 0) ? 0 : (abs(newVector.y)) / newVector.y;
 
-    console.log("vector.x : "+newVector.x)
-    console.log("vector.y : "+newVector.y)
-
-    console.log(plotter.deltaX);
-    console.log(plotter.deltaY);
-    plotter.x=current.x;
-    plotter.y=current.y;
+    plotter.x = current.x;
+    plotter.y = current.y;
     plotter.step(newVector);
 
-    //line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
     current.add(newVector);
 }
 
@@ -204,6 +161,17 @@ function avoidOutOfGrid(xNewVector, yNewVector) {
     return {xNewVector, yNewVector};
 }
 
+function setConfiguration(xNewVector, yNewVector, configuration) {
+    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
+        configuration = 'oblique';
+    } else if (xNewVector === 0 && yNewVector != 0) {
+        configuration = 'vertical';
+    } else if (yNewVector === 0 && xNewVector != 0) {
+        configuration = 'horizontal';
+    }
+    return configuration;
+}
+
 // -------------------
 //    Initialization
 // -------------------
@@ -211,7 +179,6 @@ function avoidOutOfGrid(xNewVector, yNewVector) {
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
-    frameRate(1);
 }
 
 function windowResized() {

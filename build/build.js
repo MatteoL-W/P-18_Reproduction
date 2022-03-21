@@ -6,8 +6,9 @@ var params = {
 gui.add(params, "Seed", 1, 50, 1);
 gui.add(params, "Download_Image");
 var PADDING = 10;
-var LINES_NB = 100;
+var LINES_NB = 20;
 var MAX_NORM = 200;
+var MULTIPLIERS = 20;
 var current;
 var plotter;
 var Plotter = (function () {
@@ -31,18 +32,6 @@ var Plotter = (function () {
     };
     return Plotter;
 }());
-function checkConfiguration(xNewVector, yNewVector, configuration) {
-    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
-        configuration = 'oblique';
-    }
-    else if (xNewVector === 0 && yNewVector != 0) {
-        configuration = 'vertical';
-    }
-    else if (yNewVector === 0 && xNewVector != 0) {
-        configuration = 'horizontal';
-    }
-    return configuration;
-}
 function draw() {
     randomSeed(params.Seed);
     background("white");
@@ -78,55 +67,31 @@ function draw() {
             drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector));
         }
         else {
-            randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
+            randomNorm = MULTIPLIERS * floor(random(0, MAX_NORM) / MULTIPLIERS);
             repetition = false;
-            var xRandom = floor(random(0, 3));
-            var yRandom = floor(random(0, 3));
-            switch (xRandom) {
-                case 0:
-                    xNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    xNewVector = 0;
-                    break;
-                case 2:
-                    xNewVector = randomNorm;
-                    break;
-            }
-            switch (yRandom) {
-                case 0:
-                    yNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    yNewVector = 0;
-                    break;
-                case 2:
-                    yNewVector = randomNorm;
-                    break;
-            }
-            var inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
-            xNewVector = inGridVector.xNewVector;
-            yNewVector = inGridVector.yNewVector;
-            configuration = checkConfiguration(xNewVector, yNewVector, configuration);
-            if (xNewVector === yNewVector && yNewVector === 0) {
+            var xNewVector_1 = random([-1 * randomNorm, 0, randomNorm]);
+            var yNewVector_1 = random([-1 * randomNorm, 0, randomNorm]);
+            var inGridVector = avoidOutOfGrid(xNewVector_1, yNewVector_1);
+            xNewVector_1 = inGridVector.xNewVector;
+            yNewVector_1 = inGridVector.yNewVector;
+            configuration = setConfiguration(xNewVector_1, yNewVector_1, configuration);
+            if (xNewVector_1 === yNewVector_1 && yNewVector_1 === 0) {
                 i--;
             }
-            if (randomRun < 0.3) {
-                repetition = true;
-                repetitionProbability = 1;
-                iterationRepetition = 0;
+            else {
+                if (randomRun < 0.3) {
+                    repetition = true;
+                    repetitionProbability = 1;
+                    iterationRepetition = 0;
+                }
+                drawLines(createVector(xNewVector_1, yNewVector_1));
             }
-            drawLines(createVector(xNewVector, yNewVector));
         }
     }
 }
 function drawLines(newVector) {
     plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x)) / newVector.x;
     plotter.deltaY = (newVector.y === 0) ? 0 : (abs(newVector.y)) / newVector.y;
-    console.log("vector.x : " + newVector.x);
-    console.log("vector.y : " + newVector.y);
-    console.log(plotter.deltaX);
-    console.log(plotter.deltaY);
     plotter.x = current.x;
     plotter.y = current.y;
     plotter.step(newVector);
@@ -148,10 +113,21 @@ function avoidOutOfGrid(xNewVector, yNewVector) {
     }
     return { xNewVector: xNewVector, yNewVector: yNewVector };
 }
+function setConfiguration(xNewVector, yNewVector, configuration) {
+    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
+        configuration = 'oblique';
+    }
+    else if (xNewVector === 0 && yNewVector != 0) {
+        configuration = 'vertical';
+    }
+    else if (yNewVector === 0 && xNewVector != 0) {
+        configuration = 'horizontal';
+    }
+    return configuration;
+}
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
-    frameRate(1);
 }
 function windowResized() {
     p6_ResizeCanvas();
