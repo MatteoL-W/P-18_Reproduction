@@ -32,13 +32,7 @@ var Plotter = (function () {
         line(this.x, this.y + 5, this.x, this.y - 5);
     };
     Plotter.prototype.step = function (newVector) {
-        for (var i = 0; i < newVector.mag() * 2; i++) {
-            this.x += this.deltaX / 2;
-            this.y += this.deltaY / 2;
-            this.x = constrain(this.x, params.Padding, width - params.Padding);
-            this.y = constrain(this.y, params.Padding, height - params.Padding);
-            this.render();
-        }
+        line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
     };
     return Plotter;
 }());
@@ -46,7 +40,6 @@ function draw() {
     if (counter < params.Lines_nb) {
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
-        console.log(randomRun);
         if (repetition && randomRun < repetitionProbability) {
             var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
             if (configuration === 'horizontal') {
@@ -101,19 +94,6 @@ function drawLines(newVector) {
     current.add(newVector);
 }
 function avoidOutOfGrid(xNewVector, yNewVector) {
-    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-    if (futureVectorCopy.x < params.Padding) {
-        xNewVector = abs(xNewVector);
-    }
-    else if (futureVectorCopy.x > width - params.Padding) {
-        xNewVector = -xNewVector;
-    }
-    if (futureVectorCopy.y < params.Padding) {
-        yNewVector = abs(yNewVector);
-    }
-    else if (futureVectorCopy.y > height - params.Padding) {
-        yNewVector = -yNewVector;
-    }
     return { xNewVector: xNewVector, yNewVector: yNewVector };
 }
 function setConfiguration(xNewVector, yNewVector, configuration) {

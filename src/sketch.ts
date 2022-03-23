@@ -54,14 +54,15 @@ class Plotter {
     }
 
     step(newVector) {
-        for (let i = 0; i < newVector.mag() * 2; i++) {
+        /*for (let i = 0; i < newVector.mag() * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
             this.x = constrain(this.x, params.Padding, width - params.Padding);
             this.y = constrain(this.y, params.Padding, height - params.Padding);
 
             this.render();
-        }
+        }*/
+        line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
     }
 }
 
@@ -73,7 +74,6 @@ function draw() {
     if (counter < params.Lines_nb) {
         let xNewVector, yNewVector;
         let randomRun = random(0, 1);
-        console.log(randomRun)
 
         if (repetition && randomRun < repetitionProbability) {
             // Génère l'opérateur (1 ou -1) pour le "rempart" (succession de horizontal / vertical)
@@ -148,20 +148,6 @@ function drawLines(newVector) {
 }
 
 function avoidOutOfGrid(xNewVector, yNewVector) {
-    let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-
-    if (futureVectorCopy.x < params.Padding) {
-        xNewVector = abs(xNewVector)
-    } else if (futureVectorCopy.x > width - params.Padding) {
-        xNewVector = -xNewVector
-    }
-
-    if (futureVectorCopy.y < params.Padding) {
-        yNewVector = abs(yNewVector)
-    } else if (futureVectorCopy.y > height - params.Padding) {
-        yNewVector = -yNewVector
-    }
-
     return {xNewVector, yNewVector};
 }
 
