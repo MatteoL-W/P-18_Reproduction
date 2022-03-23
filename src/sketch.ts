@@ -8,15 +8,15 @@ const params = {
     Lines_nb: 100,
     Multipliers: 20,
     Max_norm: 200,
+    Padding: 80,
     Download_Image: () => save(),
 }
 gui.add(params, "Seed", 1, 50, 1)
 gui.add(params, "Lines_nb", 10, 200, 10)
 gui.add(params, "Multipliers", 1, 30, 1)
 gui.add(params, "Max_norm", 10, 250, 10)
+gui.add(params, "Padding", 0, 200, 10)
 gui.add(params, "Download_Image")
-
-const PADDING = 10;
 
 let current;
 let plotter;
@@ -44,8 +44,8 @@ class Plotter {
         for (let i = 0; i < newVector.mag() * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
-            this.x = constrain(this.x, 80, width - 80);
-            this.y = constrain(this.y, 80, height - 80);
+            this.x = constrain(this.x, params.Padding, width - params.Padding);
+            this.y = constrain(this.y, params.Padding, height - params.Padding);
 
             this.render();
         }
@@ -67,8 +67,8 @@ function draw() {
     let randomNorm;
 
     current = createVector(
-        random(PADDING, width - PADDING),
-        random(PADDING, height - PADDING)
+        random(params.Padding, width - params.Padding),
+        random(params.Padding, height - params.Padding)
     )
 
     for (let i = 0; i < params.Lines_nb; i++) {
@@ -149,15 +149,15 @@ function drawLines(newVector) {
 function avoidOutOfGrid(xNewVector, yNewVector) {
     let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
 
-    if (futureVectorCopy.x < PADDING) {
+    if (futureVectorCopy.x < params.Padding) {
         xNewVector = abs(xNewVector)
-    } else if (futureVectorCopy.x > width - PADDING) {
+    } else if (futureVectorCopy.x > width - params.Padding) {
         xNewVector = -xNewVector
     }
 
-    if (futureVectorCopy.y < PADDING) {
+    if (futureVectorCopy.y < params.Padding) {
         yNewVector = abs(yNewVector)
-    } else if (futureVectorCopy.y > height - PADDING) {
+    } else if (futureVectorCopy.y > height - params.Padding) {
         yNewVector = -yNewVector
     }
 
