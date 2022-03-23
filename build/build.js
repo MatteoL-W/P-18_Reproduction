@@ -8,7 +8,7 @@ var params = {
     Download_Image: function () { return save(); },
 };
 gui.add(params, "Seed", 1, 50, 1);
-gui.add(params, "Lines_nb", 10, 200, 10);
+gui.add(params, "Lines_nb", 0, 200, 1);
 gui.add(params, "Multipliers", 1, 30, 1);
 gui.add(params, "Max_norm", 10, 250, 10);
 gui.add(params, "Padding", 0, 200, 10);
@@ -32,11 +32,18 @@ var Plotter = (function () {
         line(this.x, this.y + 5, this.x, this.y - 5);
     };
     Plotter.prototype.step = function (newVector) {
-        line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
+        for (var i = 0; i < newVector.mag() * 2; i++) {
+            this.x += this.deltaX / 2;
+            this.y += this.deltaY / 2;
+            this.x = constrain(this.x, params.Padding, width - params.Padding);
+            this.y = constrain(this.y, params.Padding, height - params.Padding);
+            this.render();
+        }
     };
     return Plotter;
 }());
 function draw() {
+    var noCounter = false;
     if (counter < params.Lines_nb) {
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
@@ -70,10 +77,17 @@ function draw() {
             var inGridVector = avoidOutOfGrid(xNewVector_1, yNewVector_1);
             xNewVector_1 = inGridVector.xNewVector;
             yNewVector_1 = inGridVector.yNewVector;
-            configuration = setConfiguration(xNewVector_1, yNewVector_1, configuration);
             if (xNewVector_1 === yNewVector_1 && yNewVector_1 === 0) {
+                noCounter = true;
+            }
+            else if (configuration === checkConfiguration(xNewVector_1, yNewVector_1)) {
+                noCounter = true;
+            }
+            else if (checkConfiguration(xNewVector_1, yNewVector_1) == undefined) {
+                noCounter = true;
             }
             else {
+                configuration = checkConfiguration(xNewVector_1, yNewVector_1);
                 if (randomRun < 0.3) {
                     repetition = true;
                     repetitionProbability = 1;
@@ -82,7 +96,10 @@ function draw() {
                 drawLines(createVector(xNewVector_1, yNewVector_1));
             }
         }
-        counter++;
+        if (!noCounter) {
+            console.log(counter);
+            counter++;
+        }
     }
 }
 function drawLines(newVector) {
@@ -94,9 +111,23 @@ function drawLines(newVector) {
     current.add(newVector);
 }
 function avoidOutOfGrid(xNewVector, yNewVector) {
+    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+    if (futureVectorCopy.x < params.Padding) {
+        xNewVector = abs(xNewVector);
+    }
+    else if (futureVectorCopy.x > width - params.Padding) {
+        xNewVector = -xNewVector;
+    }
+    if (futureVectorCopy.y < params.Padding) {
+        yNewVector = abs(yNewVector);
+    }
+    else if (futureVectorCopy.y > height - params.Padding) {
+        yNewVector = -yNewVector;
+    }
     return { xNewVector: xNewVector, yNewVector: yNewVector };
 }
-function setConfiguration(xNewVector, yNewVector, configuration) {
+function checkConfiguration(xNewVector, yNewVector) {
+    var configuration;
     if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
         configuration = 'oblique';
     }

@@ -12,7 +12,7 @@ const params = {
     Download_Image: () => save(),
 }
 gui.add(params, "Seed", 1, 50, 1)
-gui.add(params, "Lines_nb", 10, 200, 10)
+gui.add(params, "Lines_nb", 0, 200, 1)
 gui.add(params, "Multipliers", 1, 30, 1)
 gui.add(params, "Max_norm", 10, 250, 10)
 gui.add(params, "Padding", 0, 200, 10)
@@ -54,15 +54,16 @@ class Plotter {
     }
 
     step(newVector) {
-        /*for (let i = 0; i < newVector.mag() * 2; i++) {
+        for (let i = 0; i < newVector.mag() * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
             this.x = constrain(this.x, params.Padding, width - params.Padding);
             this.y = constrain(this.y, params.Padding, height - params.Padding);
 
             this.render();
-        }*/
-        line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
+        }
+        // ça marche bien pour les lignes draw par p5
+        //line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
     }
 }
 
@@ -71,6 +72,7 @@ class Plotter {
 // -------------------
 
 function draw() {
+    let noCounter = false;
     if (counter < params.Lines_nb) {
         let xNewVector, yNewVector;
         let randomRun = random(0, 1);
@@ -112,16 +114,22 @@ function draw() {
             xNewVector = inGridVector.xNewVector;
             yNewVector = inGridVector.yNewVector;
 
-            configuration = setConfiguration(xNewVector, yNewVector, configuration);
-
             // If the new vector is equal to 0
             if (xNewVector === yNewVector && yNewVector === 0) {
-
+                noCounter = true;
             }
-                // faudra probablement mettre l'interdiction du nouveau vecteur inverse dans un else if ici
+
+            else if (configuration === checkConfiguration(xNewVector, yNewVector)) {
+                noCounter = true;
+            }
+
+            else if (checkConfiguration(xNewVector, yNewVector) == undefined) {
+                noCounter = true;
+            }
 
             // Draw the lines only if the xNewVector is new
             else {
+                configuration = checkConfiguration(xNewVector, yNewVector);
                 // Activate the repetition parameter
                 if (randomRun < 0.3) {
                     repetition = true;
@@ -132,7 +140,10 @@ function draw() {
                 drawLines(createVector(xNewVector, yNewVector))
             }
         }
-        counter++;
+        if (!noCounter) {
+            console.log(counter)
+            counter++;
+        }
     }
 }
 
@@ -148,10 +159,25 @@ function drawLines(newVector) {
 }
 
 function avoidOutOfGrid(xNewVector, yNewVector) {
+    let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+
+    if (futureVectorCopy.x < params.Padding) {
+        xNewVector = abs(xNewVector)
+    } else if (futureVectorCopy.x > width - params.Padding) {
+        xNewVector = -xNewVector
+    }
+
+    if (futureVectorCopy.y < params.Padding) {
+        yNewVector = abs(yNewVector)
+    } else if (futureVectorCopy.y > height - params.Padding) {
+        yNewVector = -yNewVector
+    }
+
     return {xNewVector, yNewVector};
 }
 
-function setConfiguration(xNewVector, yNewVector, configuration) {
+function checkConfiguration(xNewVector, yNewVector) {
+    let configuration;
     if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
         configuration = 'oblique';
     } else if (xNewVector === 0 && yNewVector != 0) {
