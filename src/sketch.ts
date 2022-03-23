@@ -18,10 +18,23 @@ gui.add(params, "Max_norm", 10, 250, 10)
 gui.add(params, "Padding", 0, 200, 10)
 gui.add(params, "Download_Image")
 
+// -------------------
+//  Initialization
+// -------------------
+
 let current;
 let plotter;
+let counter = 0;
 
-// Class
+let configuration;
+let repetition = false;
+let repetitionProbability = 1;
+let iterationRepetition = 0;
+let randomNorm;
+
+// -------------------
+//  Classes
+// -------------------
 
 class Plotter {
     x: number;
@@ -57,23 +70,10 @@ class Plotter {
 // -------------------
 
 function draw() {
-    randomSeed(params.Seed)
-    background("white")
-
-    let configuration;
-    let repetition = false;
-    let repetitionProbability = 1;
-    let iterationRepetition = 0;
-    let randomNorm;
-
-    current = createVector(
-        random(params.Padding, width - params.Padding),
-        random(params.Padding, height - params.Padding)
-    )
-
-    for (let i = 0; i < params.Lines_nb; i++) {
+    if (counter < params.Lines_nb) {
         let xNewVector, yNewVector;
         let randomRun = random(0, 1);
+        console.log(randomRun)
 
         if (repetition && randomRun < repetitionProbability) {
             // Génère l'opérateur (1 ou -1) pour le "rempart" (succession de horizontal / vertical)
@@ -116,9 +116,9 @@ function draw() {
 
             // If the new vector is equal to 0
             if (xNewVector === yNewVector && yNewVector === 0) {
-                i--;
+
             }
-            // faudra probablement mettre l'interdiction du nouveau vecteur inverse dans un else if ici
+                // faudra probablement mettre l'interdiction du nouveau vecteur inverse dans un else if ici
 
             // Draw the lines only if the xNewVector is new
             else {
@@ -132,6 +132,7 @@ function draw() {
                 drawLines(createVector(xNewVector, yNewVector))
             }
         }
+        counter++;
     }
 }
 
@@ -182,6 +183,13 @@ function setConfiguration(xNewVector, yNewVector, configuration) {
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
+    background("white")
+    frameRate(5)
+
+    current = createVector(
+        random(params.Padding, width - params.Padding),
+        random(params.Padding, height - params.Padding)
+    )
 }
 
 function windowResized() {

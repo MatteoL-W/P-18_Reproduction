@@ -15,6 +15,12 @@ gui.add(params, "Padding", 0, 200, 10);
 gui.add(params, "Download_Image");
 var current;
 var plotter;
+var counter = 0;
+var configuration;
+var repetition = false;
+var repetitionProbability = 1;
+var iterationRepetition = 0;
+var randomNorm;
 var Plotter = (function () {
     function Plotter() {
         this.x = 0;
@@ -37,17 +43,10 @@ var Plotter = (function () {
     return Plotter;
 }());
 function draw() {
-    randomSeed(params.Seed);
-    background("white");
-    var configuration;
-    var repetition = false;
-    var repetitionProbability = 1;
-    var iterationRepetition = 0;
-    var randomNorm;
-    current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
-    for (var i = 0; i < params.Lines_nb; i++) {
+    if (counter < params.Lines_nb) {
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
+        console.log(randomRun);
         if (repetition && randomRun < repetitionProbability) {
             var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
             if (configuration === 'horizontal') {
@@ -80,7 +79,6 @@ function draw() {
             yNewVector_1 = inGridVector.yNewVector;
             configuration = setConfiguration(xNewVector_1, yNewVector_1, configuration);
             if (xNewVector_1 === yNewVector_1 && yNewVector_1 === 0) {
-                i--;
             }
             else {
                 if (randomRun < 0.3) {
@@ -91,6 +89,7 @@ function draw() {
                 drawLines(createVector(xNewVector_1, yNewVector_1));
             }
         }
+        counter++;
     }
 }
 function drawLines(newVector) {
@@ -132,6 +131,9 @@ function setConfiguration(xNewVector, yNewVector, configuration) {
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
+    background("white");
+    frameRate(5);
+    current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
 }
 function windowResized() {
     p6_ResizeCanvas();
