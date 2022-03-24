@@ -27,6 +27,7 @@ let plotter;
 let counter = 0;
 
 let configuration;
+let configurationOblique;
 let repetition = false;
 let repetitionProbability = 1;
 let iterationRepetition = 0;
@@ -92,15 +93,18 @@ function draw() {
                 configuration = 'horizontal'
             } else if (configuration === 'oblique') {
                 // Génère l'opérateur pour les dents (zigzag)
-                operator = (iterationRepetition % 2 == 0) ? 1 : -1;
-                xNewVector = operator * randomNorm;
-                yNewVector = randomNorm;
+                xNewVector = (configurationOblique === 'x') ? -randomNorm * plotter.deltaX : randomNorm * plotter.deltaX
+                yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY
             }
 
             repetitionProbability -= .2;
             iterationRepetition++;
 
             const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
+
+            console.log("x : "  + inGridVector.xNewVector)
+            console.log("y : "  + inGridVector.yNewVector)
+            console.log("-----------")
 
             drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector))
         } else {
@@ -132,10 +136,11 @@ function draw() {
             else {
                 configuration = checkConfiguration(xNewVector, yNewVector);
                 // Activate the repetition parameter
-                if (randomRun < 0.6) {
+                if (randomRun < 1) {
                     repetition = true;
                     repetitionProbability = 1;
                     iterationRepetition = 0;
+                    configurationOblique = random(['x', 'y'])
                 }
 
                 drawLines(createVector(xNewVector, yNewVector))
