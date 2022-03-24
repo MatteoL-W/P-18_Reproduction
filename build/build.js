@@ -32,7 +32,9 @@ var Plotter = (function () {
         line(this.x, this.y + 5, this.x, this.y - 5);
     };
     Plotter.prototype.step = function (newVector) {
-        for (var i = 0; i < newVector.mag() * 2; i++) {
+        var distance = newVector.mag();
+        distance = (configuration === 'oblique') ? distance / sqrt(2) : distance;
+        for (var i = 0; i < distance * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
             this.x = constrain(this.x, params.Padding, width - params.Padding);
@@ -88,7 +90,7 @@ function draw() {
             }
             else {
                 configuration = checkConfiguration(xNewVector_1, yNewVector_1);
-                if (randomRun < 0.3) {
+                if (randomRun < 0.6) {
                     repetition = true;
                     repetitionProbability = 1;
                     iterationRepetition = 0;
@@ -97,7 +99,6 @@ function draw() {
             }
         }
         if (!noCounter) {
-            console.log(counter);
             counter++;
         }
     }

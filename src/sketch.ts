@@ -54,7 +54,10 @@ class Plotter {
     }
 
     step(newVector) {
-        for (let i = 0; i < newVector.mag() * 2; i++) {
+        let distance = newVector.mag();
+        distance = (configuration === 'oblique') ? distance/sqrt(2) : distance;
+
+        for (let i = 0; i < distance * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
             this.x = constrain(this.x, params.Padding, width - params.Padding);
@@ -62,8 +65,6 @@ class Plotter {
 
             this.render();
         }
-        // ça marche bien pour les lignes draw par p5
-        //line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
     }
 }
 
@@ -131,7 +132,7 @@ function draw() {
             else {
                 configuration = checkConfiguration(xNewVector, yNewVector);
                 // Activate the repetition parameter
-                if (randomRun < 0.3) {
+                if (randomRun < 0.6) {
                     repetition = true;
                     repetitionProbability = 1;
                     iterationRepetition = 0;
@@ -141,7 +142,6 @@ function draw() {
             }
         }
         if (!noCounter) {
-            console.log(counter)
             counter++;
         }
     }
