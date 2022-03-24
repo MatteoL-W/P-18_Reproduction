@@ -5,11 +5,12 @@
 const gui = new dat.GUI()
 const params = {
     Seed: 1,
-    Lines_nb: 100,
+    Lines_nb: 5,
     Multipliers: 20,
     Max_norm: 200,
     Padding: 80,
     Download_Image: () => save(),
+    Ajouter_Ligne:() => params.Lines_nb++,
 }
 gui.add(params, "Seed", 1, 50, 1)
 gui.add(params, "Lines_nb", 0, 200, 1)
@@ -17,6 +18,7 @@ gui.add(params, "Multipliers", 1, 30, 1)
 gui.add(params, "Max_norm", 10, 250, 10)
 gui.add(params, "Padding", 0, 200, 10)
 gui.add(params, "Download_Image")
+gui.add(params, "Ajouter_Ligne")
 
 // -------------------
 //  Initialization
@@ -32,7 +34,11 @@ let repetition = false;
 let repetitionProbability = 1;
 let iterationRepetition = 0;
 let randomNorm;
-
+let operatorRandom;
+let configurationRepetition;
+let operatorX;
+let operatorY;
+let randomLengthOpposite;
 // -------------------
 //  Classes
 // -------------------
@@ -78,75 +84,153 @@ function draw() {
     if (counter < params.Lines_nb) {
         let xNewVector, yNewVector;
         let randomRun = random(0, 1);
+        if (repetition && randomRun < repetitionProbability)
+        {
+            let configTemp = configuration;
+            console.log("configRepet : "+configurationRepetition)
+            switch (configurationRepetition)
+            {
+                case 'horizontal':
+                    switch (configuration)
+                    {
+                        case 'horizontal':
+                            xNewVector = 0;
+                            console.log("!!! : "+operatorRandom)
+                            console.log("randomLengthOpposite : "+randomLengthOpposite)
+                            yNewVector = operatorRandom * randomLengthOpposite;
+                            configuration = 'vertical';
+                            break;
+                        case 'vertical':
+                            operatorX *= -1;
+                            xNewVector = operatorX * randomNorm;
+                            yNewVector = 0;
+                            configuration = 'horizontal'
+                            break;   
+                    }
+                    break;
 
-        if (repetition && randomRun < repetitionProbability) {
-            // Génère l'opérateur (1 ou -1) pour le "rempart" (succession de horizontal / vertical)
-            let operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
-
-            if (configuration === 'horizontal') {
-                xNewVector = 0;
-                yNewVector = operator * randomNorm;
-                configuration = 'vertical';
-            } else if (configuration === 'vertical') {
-                xNewVector = -operator * randomNorm;
-                yNewVector = 0;
-                configuration = 'horizontal'
-            } else if (configuration === 'oblique') {
-                // Génère l'opérateur pour les dents (zigzag)
-                xNewVector = (configurationOblique === 'x') ? -randomNorm * plotter.deltaX : randomNorm * plotter.deltaX
-                yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY
+                case 'vertical':
+                    switch (configuration)
+                    {
+                        case 'vertical':
+                            xNewVector = operatorRandom * randomLengthOpposite;
+                            console.log("!!! : "+operatorRandom)
+                            console.log("randomLengthOpposite : "+randomLengthOpposite)
+                            yNewVector = 0;
+                            configuration = 'horizontal'
+                            break;   
+                        case 'horizontal':
+                            operatorY *= -1;
+                            xNewVector = 0;
+                            yNewVector = operatorY * randomNorm;
+                            configuration = 'vertical';
+                            break;
+                    }
+                    break;
+                
+                case 'oblique':
+                    xNewVector = (configurationOblique === 'x') ? -randomNorm * plotter.deltaX : randomNorm * plotter.deltaX
+                    yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY
+                    break;
             }
+
+            console.log("REPETITION : "+configuration)
 
             repetitionProbability -= .2;
             iterationRepetition++;
 
-            const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
+            const inGridVector = outOfGrid(xNewVector, yNewVector);
 
-            console.log("x : "  + inGridVector.xNewVector)
-            console.log("y : "  + inGridVector.yNewVector)
-            console.log("-----------")
+            console.log("x : "  + xNewVector)
+            console.log("y : "  + yNewVector)
 
-            drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector))
-        } else {
+            if (outOfGrid(xNewVector, yNewVector)!=1)
+            {
+                drawLines(createVector(xNewVector, yNewVector))
+            }
+            else
+            {
+                console.log("repetition out of grid")
+                console.log("-----------")
+                configuration=configTemp;
+                repetition=false;
+                counter--;
+            }
+            
+        }
+        
+        else
+        {
+            console.log("NORMAL")
+            console.log(configuration)
+            let configurationTemp = whatConfiguration(xNewVector, yNewVector);
+            console.log("whatconf avant new : "+configurationTemp);
             // Only multiplier of MULTIPLIERS to have a structure
             randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
             repetition = false;
 
-            let xNewVector = random([-1 * randomNorm, 0, randomNorm]);
-            let yNewVector = random([-1 * randomNorm, 0, randomNorm]);
+            xNewVector = random([-1 * randomNorm, 0, randomNorm]);
+            yNewVector = random([-1 * randomNorm, 0, randomNorm]);
 
-            const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
-            xNewVector = inGridVector.xNewVector;
-            yNewVector = inGridVector.yNewVector;
+            console.log("whatconf apres new : "+whatConfiguration(xNewVector, yNewVector));
 
-            // If the new vector is equal to 0
-            if (xNewVector === yNewVector && yNewVector === 0) {
-                noCounter = true;
-            }
-
-            else if (configuration === checkConfiguration(xNewVector, yNewVector)) {
-                noCounter = true;
-            }
-
-            else if (checkConfiguration(xNewVector, yNewVector) == undefined) {
-                noCounter = true;
-            }
-
-            // Draw the lines only if the xNewVector is new
-            else {
-                configuration = checkConfiguration(xNewVector, yNewVector);
-                // Activate the repetition parameter
-                if (randomRun < 1) {
-                    repetition = true;
-                    repetitionProbability = 1;
-                    iterationRepetition = 0;
-                    configurationOblique = random(['x', 'y'])
+            if (outOfGrid(xNewVector, yNewVector)==0)
+            {
+                console.log("pas outofgrid")
+                // If the new vector is equal to 0
+                if (xNewVector === yNewVector && yNewVector === 0) {
+                    noCounter = true;
+                    console.log("vecteur nul")
+                    console.log(configuration)
                 }
 
-                drawLines(createVector(xNewVector, yNewVector))
+                else if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
+                    noCounter = true;
+                    console.log("vecteur colinéaire")
+                }
+
+                else if (whatConfiguration(xNewVector, yNewVector) == undefined) {
+                    noCounter = true;
+                    console.log("jsp")
+                }
+
+                // Draw the lines only if the xNewVector is new
+                else
+                {
+                    configuration = whatConfiguration(xNewVector, yNewVector);
+                    // Activate the repetition parameter
+                    if (randomRun < 1) {
+                        repetition = true;
+                        repetitionProbability = 1;
+                        iterationRepetition = 0;
+                        configurationOblique = random(['x', 'y'])
+                    }
+
+                    console.log("x : "  + xNewVector)
+                    console.log("y : "  + yNewVector)
+                    console.log("-----------")
+
+
+
+                    configurationRepetition=whatConfiguration(xNewVector,yNewVector);
+                    console.log("operatorRandom : "+operatorRandom);
+
+                    drawLines(createVector(xNewVector, yNewVector))
+
+                    operatorX=plotter.deltaX;
+                    operatorY=plotter.deltaY;
+                    console.log("opX :"+operatorX+"  opY :"+operatorY)
+                    operatorRandom=random([-1,1]);
+                    randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
+                }
+            }
+            else
+            {
+                counter--;
             }
         }
-        if (!noCounter) {
+        if (!noCounter)
+        {
             counter++;
         }
     }
@@ -163,9 +247,10 @@ function drawLines(newVector) {
     current.add(newVector);
 }
 
-function avoidOutOfGrid(xNewVector, yNewVector) {
+function outOfGrid(xNewVector, yNewVector) {
     let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
 
+    /*
     if (futureVectorCopy.x < params.Padding) {
         xNewVector = abs(xNewVector)
     } else if (futureVectorCopy.x > width - params.Padding) {
@@ -176,19 +261,27 @@ function avoidOutOfGrid(xNewVector, yNewVector) {
         yNewVector = abs(yNewVector)
     } else if (futureVectorCopy.y > height - params.Padding) {
         yNewVector = -yNewVector
+    }*/
+    if(futureVectorCopy.x<params.Padding || futureVectorCopy.x>width-params.Padding)
+    {
+        return 1;
     }
-
-    return {xNewVector, yNewVector};
+    if(futureVectorCopy.y<params.Padding || futureVectorCopy.y>height-params.Padding)
+    {
+        return 1;
+    }
+    
+    return 0;
+    //return {xNewVector, yNewVector};
 }
 
-function checkConfiguration(xNewVector, yNewVector) {
-    let configuration;
+function whatConfiguration(xNewVector, yNewVector) { //return the actual configuration based on vector's x and y position
     if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
-        configuration = 'oblique';
+        return 'oblique';
     } else if (xNewVector === 0 && yNewVector != 0) {
-        configuration = 'vertical';
+        return 'vertical';
     } else if (yNewVector === 0 && xNewVector != 0) {
-        configuration = 'horizontal';
+        return 'horizontal';
     }
     return configuration;
 }
