@@ -39,6 +39,8 @@ let configurationRepetition;
 let operatorX;
 let operatorY;
 let randomLengthOpposite;
+let repetitionNumber;
+let repetitionCounter;
 // -------------------
 //  Classes
 // -------------------
@@ -48,16 +50,32 @@ class Plotter {
     y: number;
     deltaX: number;
     deltaY: number;
+    mode: number;
 
     constructor() {
         this.x = 0;
         this.y = 0;
         this.deltaX = 0;
         this.deltaY = 0;
+        this.mode = 0;
     }
 
     render() {
-        line(this.x, this.y + 5, this.x, this.y - 5);
+        switch(this.mode)
+        {
+            case 0 : //default -> point
+                point(this.x,this.y)
+                break;
+            case 1 : //1 -> vertical line
+                line(this.x, this.y + 5, this.x, this.y - 5);
+                break;
+            case 2 : //2 -> horizontal line
+                line(this.x-5, this.y, this.x+5, this.y);
+                break;  
+            case 3 : //2 -> horizontal line for obkique
+                line(this.x, this.y, this.x+10, this.y);
+                break;  
+        }
     }
 
     step(newVector) {
@@ -84,16 +102,18 @@ function draw() {
     if (counter < params.Lines_nb) {
         let xNewVector, yNewVector;
         let randomRun = random(0, 1);
-        if (repetition && randomRun < repetitionProbability)
+        if (repetitionCounter<repetitionNumber)
         {
             let configTemp = configuration;
             console.log("configRepet : "+configurationRepetition)
+
             switch (configurationRepetition)
             {
                 case 'horizontal':
                     switch (configuration)
                     {
                         case 'horizontal':
+                            plotter.mode=2;
                             xNewVector = 0;
                             console.log("!!! : "+operatorRandom)
                             console.log("randomLengthOpposite : "+randomLengthOpposite)
@@ -101,6 +121,7 @@ function draw() {
                             configuration = 'vertical';
                             break;
                         case 'vertical':
+                            plotter.mode=0;
                             operatorX *= -1;
                             xNewVector = operatorX * randomNorm;
                             yNewVector = 0;
@@ -113,6 +134,7 @@ function draw() {
                     switch (configuration)
                     {
                         case 'vertical':
+                            plotter.mode=1;
                             xNewVector = operatorRandom * randomLengthOpposite;
                             console.log("!!! : "+operatorRandom)
                             console.log("randomLengthOpposite : "+randomLengthOpposite)
@@ -120,6 +142,7 @@ function draw() {
                             configuration = 'horizontal'
                             break;   
                         case 'horizontal':
+                            plotter.mode=0;
                             operatorY *= -1;
                             xNewVector = 0;
                             yNewVector = operatorY * randomNorm;
@@ -146,6 +169,8 @@ function draw() {
 
             if (outOfGrid(xNewVector, yNewVector)!=1)
             {
+                console.log(plotter.mode)
+                repetitionCounter++;
                 drawLines(createVector(xNewVector, yNewVector))
             }
             else
@@ -155,12 +180,15 @@ function draw() {
                 configuration=configTemp;
                 repetition=false;
                 counter--;
+                repetitionNumber=0;
+                console.log("???????????,")
             }
-            
+
         }
         
         else
         {
+            repetitionCounter=0;
             console.log("NORMAL")
             console.log(configuration)
             let configurationTemp = whatConfiguration(xNewVector, yNewVector);
@@ -169,6 +197,7 @@ function draw() {
             randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
             repetition = false;
 
+            plotter.rotateMode=random([1,0,0,0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
 
@@ -222,6 +251,17 @@ function draw() {
                     console.log("opX :"+operatorX+"  opY :"+operatorY)
                     operatorRandom=random([-1,1]);
                     randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
+
+                    let flip3 = random([0,1,2])
+                    if (flip3 == 0)
+                    {
+                        repetition = true;
+                        repetitionNumber = random([4,5,6,7]);
+                                    if (configurationRepetition=='oblique')
+            {
+                plotter.mode=random([0,0,0,3])
+            }
+                    }
                 }
             }
             else
@@ -250,18 +290,6 @@ function drawLines(newVector) {
 function outOfGrid(xNewVector, yNewVector) {
     let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
 
-    /*
-    if (futureVectorCopy.x < params.Padding) {
-        xNewVector = abs(xNewVector)
-    } else if (futureVectorCopy.x > width - params.Padding) {
-        xNewVector = -xNewVector
-    }
-
-    if (futureVectorCopy.y < params.Padding) {
-        yNewVector = abs(yNewVector)
-    } else if (futureVectorCopy.y > height - params.Padding) {
-        yNewVector = -yNewVector
-    }*/
     if(futureVectorCopy.x<params.Padding || futureVectorCopy.x>width-params.Padding)
     {
         return 1;
@@ -272,7 +300,6 @@ function outOfGrid(xNewVector, yNewVector) {
     }
     
     return 0;
-    //return {xNewVector, yNewVector};
 }
 
 function whatConfiguration(xNewVector, yNewVector) { //return the actual configuration based on vector's x and y position
@@ -293,6 +320,7 @@ function whatConfiguration(xNewVector, yNewVector) { //return the actual configu
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
+    plotter.mode=0;
     background("white")
     frameRate(5)
 

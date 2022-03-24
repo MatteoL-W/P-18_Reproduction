@@ -29,15 +29,31 @@ var configurationRepetition;
 var operatorX;
 var operatorY;
 var randomLengthOpposite;
+var repetitionNumber;
+var repetitionCounter;
 var Plotter = (function () {
     function Plotter() {
         this.x = 0;
         this.y = 0;
         this.deltaX = 0;
         this.deltaY = 0;
+        this.mode = 0;
     }
     Plotter.prototype.render = function () {
-        line(this.x, this.y + 5, this.x, this.y - 5);
+        switch (this.mode) {
+            case 0:
+                point(this.x, this.y);
+                break;
+            case 1:
+                line(this.x, this.y + 5, this.x, this.y - 5);
+                break;
+            case 2:
+                line(this.x - 5, this.y, this.x + 5, this.y);
+                break;
+            case 3:
+                line(this.x, this.y, this.x + 10, this.y);
+                break;
+        }
     };
     Plotter.prototype.step = function (newVector) {
         var distance = newVector.mag();
@@ -57,13 +73,14 @@ function draw() {
     if (counter < params.Lines_nb) {
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
-        if (repetition && randomRun < repetitionProbability) {
+        if (repetitionCounter < repetitionNumber) {
             var configTemp = configuration;
             console.log("configRepet : " + configurationRepetition);
             switch (configurationRepetition) {
                 case 'horizontal':
                     switch (configuration) {
                         case 'horizontal':
+                            plotter.mode = 2;
                             xNewVector = 0;
                             console.log("!!! : " + operatorRandom);
                             console.log("randomLengthOpposite : " + randomLengthOpposite);
@@ -71,6 +88,7 @@ function draw() {
                             configuration = 'vertical';
                             break;
                         case 'vertical':
+                            plotter.mode = 0;
                             operatorX *= -1;
                             xNewVector = operatorX * randomNorm;
                             yNewVector = 0;
@@ -81,6 +99,7 @@ function draw() {
                 case 'vertical':
                     switch (configuration) {
                         case 'vertical':
+                            plotter.mode = 1;
                             xNewVector = operatorRandom * randomLengthOpposite;
                             console.log("!!! : " + operatorRandom);
                             console.log("randomLengthOpposite : " + randomLengthOpposite);
@@ -88,6 +107,7 @@ function draw() {
                             configuration = 'horizontal';
                             break;
                         case 'horizontal':
+                            plotter.mode = 0;
                             operatorY *= -1;
                             xNewVector = 0;
                             yNewVector = operatorY * randomNorm;
@@ -107,6 +127,8 @@ function draw() {
             console.log("x : " + xNewVector);
             console.log("y : " + yNewVector);
             if (outOfGrid(xNewVector, yNewVector) != 1) {
+                console.log(plotter.mode);
+                repetitionCounter++;
                 drawLines(createVector(xNewVector, yNewVector));
             }
             else {
@@ -115,15 +137,19 @@ function draw() {
                 configuration = configTemp;
                 repetition = false;
                 counter--;
+                repetitionNumber = 0;
+                console.log("???????????,");
             }
         }
         else {
+            repetitionCounter = 0;
             console.log("NORMAL");
             console.log(configuration);
             var configurationTemp = whatConfiguration(xNewVector, yNewVector);
             console.log("whatconf avant new : " + configurationTemp);
             randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
             repetition = false;
+            plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
             console.log("whatconf apres new : " + whatConfiguration(xNewVector, yNewVector));
@@ -161,6 +187,14 @@ function draw() {
                     console.log("opX :" + operatorX + "  opY :" + operatorY);
                     operatorRandom = random([-1, 1]);
                     randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
+                    var flip3 = random([0, 1, 2]);
+                    if (flip3 == 0) {
+                        repetition = true;
+                        repetitionNumber = random([4, 5, 6, 7]);
+                        if (configurationRepetition == 'oblique') {
+                            plotter.mode = random([0, 0, 0, 3]);
+                        }
+                    }
                 }
             }
             else {
@@ -205,6 +239,7 @@ function whatConfiguration(xNewVector, yNewVector) {
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
+    plotter.mode = 0;
     background("white");
     frameRate(5);
     current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
