@@ -16,7 +16,8 @@ gui.add(params, "Padding", 0, 200, 10);
 gui.add(params, "Download_Image");
 gui.add(params, "Ajouter_Ligne");
 var gif_loadImg;
-var fontMenu;
+var fontMenuBold;
+var fontMenuLight;
 var current;
 var plotter;
 var counter = -1;
@@ -42,8 +43,9 @@ var rectConstrain = (function () {
     }
     rectConstrain.prototype.render = function () {
         push();
-        fill(200, 0, 200, 5);
-        noStroke();
+        stroke(128, 0, 128, 1);
+        strokeWeight(10);
+        noFill();
         circle(this.x, this.y, this.rayon);
         pop();
     };
@@ -106,9 +108,10 @@ function draw() {
         image(gif_loadImg, width / 2, height / 2);
         textAlign(CENTER);
         textSize(50);
-        textFont(fontMenu);
+        textFont(fontMenuBold);
         text("Start", width / 2, 250);
         textSize(30);
+        textFont(fontMenuLight);
         text("Bougez la souris lentement !", width / 2, 800);
         pop();
     }
@@ -298,14 +301,15 @@ function whatConfiguration(xNewVector, yNewVector) {
 }
 function preload() {
     gif_loadImg = loadImage("https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g");
-    fontMenu = loadFont("./font/Noto_Sans_JP/NotoSansJP-Black.otf");
+    fontMenuBold = loadFont("./font/Noto_Sans_JP/NotoSansJP-Black.otf");
+    fontMenuLight = loadFont("./font/Noto_Sans_JP/NotoSansJP-Thin.otf");
 }
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
     plotter.mode = 0;
     background("white");
-    frameRate(20);
+    frameRate(24);
     rectangle = new rectConstrain;
     current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
 }
