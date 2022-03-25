@@ -5,7 +5,7 @@
 const gui = new dat.GUI()
 const params = {
     Seed: 1,
-    Lines_nb: 100,
+    Lines_nb: 300,
     Multipliers: 20,
     Max_norm: 200,
     Padding: 80,
@@ -20,13 +20,16 @@ gui.add(params, "Padding", 0, 200, 10)
 gui.add(params, "Download_Image")
 gui.add(params, "Ajouter_Ligne")
 
+
 // -------------------
 //  Initialization
 // -------------------
-
+var gif_loadImg
+var fontMenu
 let current;
 let plotter;
-let counter = 0;
+let counter = -1;
+let rectangle;
 
 let configuration;
 let configurationOblique;
@@ -44,7 +47,32 @@ let repetitionCounter;
 // -------------------
 //  Classes
 // -------------------
+class rectConstrain {
+    x: number;
+    y: number;
+    rayon: number;
 
+
+    constructor() {
+        this.x = mouseX;
+        this.y = mouseY;
+        this.rayon=400;
+    }
+
+    render() {
+        push()
+        fill(200,0,200,5)
+        noStroke()
+        circle(this.x,this.y,this.rayon)
+        pop()
+    }
+
+    step(){
+        this.x = mouseX;
+        this.y = mouseY;
+    }
+
+}
 class Plotter {
     x: number;
     y: number;
@@ -79,6 +107,9 @@ class Plotter {
     }
 
     step(newVector) {
+        push()
+        fill("white")
+        stroke("white")
         let distance = newVector.mag();
         distance = (configuration === 'oblique') ? distance/sqrt(2) : distance;
 
@@ -90,6 +121,9 @@ class Plotter {
 
             this.render();
         }
+        this.x += this.deltaX / 2;
+        this.y += this.deltaY / 2;
+        pop();
     }
 }
 
@@ -99,10 +133,33 @@ class Plotter {
 
 function draw() {
     let noCounter = false;
-
-    if (counter < params.Lines_nb) {
+    
+    if(counter==-1)
+    {
+    //Menu
+    push()
+    stroke("black")
+    strokeWeight(2)
+    //rect(width/2-300,height/2-150,600,300)
+    imageMode(CENTER)
+    image(gif_loadImg, width/2, height/2);
+    textAlign(CENTER)
+    textSize(50)
+    textFont(fontMenu)
+    text("Start",width/2,250)
+    textSize(30)
+    text("Bougez la souris lentement !",width/2,800)
+    
+    pop()
+    }
+    
+    
+    if (counter>=0 && counter < params.Lines_nb) {
+        rectangle.step()
+        rectangle.render();
         push()
-            fill(255,255,255,10)
+            noStroke()
+            fill(0,0,0,10)
             rect(0,0,width,height)
         pop()
         let xNewVector, yNewVector;
@@ -126,6 +183,7 @@ function draw() {
                             configuration = 'vertical';
                             break;
                         case 'vertical':
+                            current.y--;
                             plotter.mode=0;
                             operatorX *= -1;
                             xNewVector = operatorX * randomNorm;
@@ -172,7 +230,7 @@ function draw() {
             console.log("x : "  + xNewVector)
             console.log("y : "  + yNewVector)
 
-            if (outOfGrid(xNewVector, yNewVector)!=1)
+            if (outOfRectangle(xNewVector, yNewVector)!=1)
             {
                 console.log(plotter.mode)
                 repetitionCounter++;
@@ -208,7 +266,7 @@ function draw() {
 
             console.log("whatconf apres new : "+whatConfiguration(xNewVector, yNewVector));
 
-            if (outOfGrid(xNewVector, yNewVector)==0)
+            if (outOfRectangle(xNewVector, yNewVector)==0)
             {
                 console.log("pas outofgrid")
                 // If the new vector is equal to 0
@@ -307,6 +365,21 @@ function outOfGrid(xNewVector, yNewVector) {
     return 0;
 }
 
+function outOfRectangle(xNewVector, yNewVector) {
+    let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+
+    if(futureVectorCopy.x<rectangle.x-(rectangle.rayon/3) || futureVectorCopy.x>rectangle.x+(rectangle.rayon/3))
+    {
+        return 1;
+    }
+    if(futureVectorCopy.y<rectangle.y-(rectangle.rayon/3)|| futureVectorCopy.y>rectangle.y+(rectangle.rayon/3) )
+    {
+        return 1;
+    }
+    
+    return 0;
+}
+
 function whatConfiguration(xNewVector, yNewVector) { //return the actual configuration based on vector's x and y position
     if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
         return 'oblique';
@@ -321,13 +394,18 @@ function whatConfiguration(xNewVector, yNewVector) { //return the actual configu
 // -------------------
 //    Initialization
 // -------------------
+function preload(){
+    gif_loadImg = loadImage("https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g");
+    fontMenu = loadFont("./font/Noto_Sans_JP/NotoSansJP-Black.otf");
+}
 
 function setup() {
     p6_CreateCanvas();
     plotter = new Plotter();
     plotter.mode=0;
     background("white")
-    frameRate(5)
+    frameRate(20)
+    rectangle = new rectConstrain;
 
     current = createVector(
         random(params.Padding, width - params.Padding),
@@ -337,4 +415,21 @@ function setup() {
 
 function windowResized() {
     p6_ResizeCanvas()
+}
+
+function mousePressed(){
+    if (counter==-1)
+    {
+        clear();
+        console.log("current.x"+current.x)
+        console.log("current.y"+current.y)
+        background("black")
+        counter++;
+    }
+}
+
+function animationMenu(){
+    current.x=width/2-200
+    current.y=height/2+100
+
 }
