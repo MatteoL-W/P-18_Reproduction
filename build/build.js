@@ -1,7 +1,7 @@
 var gui = new dat.GUI();
 var params = {
     Seed: 1,
-    Lines_nb: 5,
+    Lines_nb: 100,
     Multipliers: 20,
     Max_norm: 200,
     Padding: 80,
@@ -71,6 +71,10 @@ var Plotter = (function () {
 function draw() {
     var noCounter = false;
     if (counter < params.Lines_nb) {
+        push();
+        fill(255, 255, 255, 10);
+        rect(0, 0, width, height);
+        pop();
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
         if (repetitionCounter < repetitionNumber) {
