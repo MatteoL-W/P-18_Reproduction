@@ -240,11 +240,7 @@ function draw() {
             console.log("x : " + xNewVector)
             console.log("y : " + yNewVector)
 
-            if (outOfRectangle(xNewVector, yNewVector) === false) {
-                console.log(plotter.mode)
-                repetitionCounter++;
-                drawLines(createVector(xNewVector, yNewVector))
-            } else {
+            if (outOfRectangle(xNewVector, yNewVector) === true) {
                 console.log("repetition out of grid")
                 console.log("-----------")
                 configuration = configTemp;
@@ -254,7 +250,15 @@ function draw() {
                 console.log("???????????,")
                 return;
             }
-        } else {
+
+            console.log(plotter.mode)
+            repetitionCounter++;
+            drawLines(createVector(xNewVector, yNewVector))
+
+        }
+
+        // Si le prochain tracé n'est pas une répétition
+        else {
             repetitionCounter = 0;
             console.log("NORMAL")
             console.log(configuration)
@@ -270,58 +274,60 @@ function draw() {
 
             console.log("whatconf apres new : " + whatConfiguration(xNewVector, yNewVector));
 
-            if (outOfRectangle(xNewVector, yNewVector) === false) {
-                console.log("pas outofgrid")
-                // If the new vector is equal to 0
-                if (xNewVector === yNewVector && yNewVector === 0) {
-                    noCounter = true;
-                    console.log("vecteur nul")
-                    console.log(configuration)
-                } else if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
-                    noCounter = true;
-                    console.log("vecteur colinéaire")
-                } else if (whatConfiguration(xNewVector, yNewVector) == undefined) {
-                    noCounter = true;
-                    console.log("jsp")
+            if (outOfRectangle(xNewVector, yNewVector) === true) {
+                if (counter > 2) {
+                    counter--;
+                }
+                return;
+            }
+
+            console.log("pas outofgrid")
+            // If the new vector is equal to 0
+            if (xNewVector === yNewVector && yNewVector === 0) {
+                noCounter = true;
+                console.log("vecteur nul")
+                console.log(configuration)
+            } else if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
+                noCounter = true;
+                console.log("vecteur colinéaire")
+            } else if (whatConfiguration(xNewVector, yNewVector) == undefined) {
+                noCounter = true;
+                console.log("jsp")
+            }
+
+            // Draw the lines only if the xNewVector is new
+            else {
+                configuration = whatConfiguration(xNewVector, yNewVector);
+                // Activate the repetition parameter
+                if (random(0, 1) < 0.5) {
+                    repetition = true;
+                    iterationRepetition = 0;
+                    configurationOblique = random(['x', 'y'])
                 }
 
-                // Draw the lines only if the xNewVector is new
-                else {
-                    configuration = whatConfiguration(xNewVector, yNewVector);
-                    // Activate the repetition parameter
-                    if (random(0, 1) < 0.5) {
-                        repetition = true;
-                        iterationRepetition = 0;
-                        configurationOblique = random(['x', 'y'])
-                    }
+                console.log("x : " + xNewVector)
+                console.log("y : " + yNewVector)
+                console.log("-----------")
 
-                    console.log("x : " + xNewVector)
-                    console.log("y : " + yNewVector)
-                    console.log("-----------")
+                configurationRepetition = whatConfiguration(xNewVector, yNewVector);
+                console.log("operatorRandom : " + operatorRandom);
 
-                    configurationRepetition = whatConfiguration(xNewVector, yNewVector);
-                    console.log("operatorRandom : " + operatorRandom);
+                drawLines(createVector(xNewVector, yNewVector))
 
-                    drawLines(createVector(xNewVector, yNewVector))
+                operatorX = plotter.deltaX;
+                operatorY = plotter.deltaY;
+                console.log("opX :" + operatorX + "  opY :" + operatorY)
+                operatorRandom = random([-1, 1]);
+                randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
 
-                    operatorX = plotter.deltaX;
-                    operatorY = plotter.deltaY;
-                    console.log("opX :" + operatorX + "  opY :" + operatorY)
-                    operatorRandom = random([-1, 1]);
-                    randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
-
-                    let flip3 = random([0, 1, 2])
-                    if (flip3 == 0) {
-                        repetition = true;
-                        repetitionNumber = random([4, 5, 6, 7]);
-                        if (configurationRepetition == 'oblique') {
-                            plotter.mode = random([0, 0, 0, 3])
-                        }
+                let flip3 = random([0, 1, 2])
+                if (flip3 == 0) {
+                    repetition = true;
+                    repetitionNumber = random([4, 5, 6, 7]);
+                    if (configurationRepetition == 'oblique') {
+                        plotter.mode = random([0, 0, 0, 3])
                     }
                 }
-            } else {
-                // On décrémente la valeur de counter si on est out of grid
-                counter--;
             }
         }
         if (!noCounter) {
