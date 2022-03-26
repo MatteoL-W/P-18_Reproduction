@@ -1,20 +1,23 @@
 var gui = new dat.GUI();
 var params = {
-    Seed: 1,
-    Lines_nb: 300,
-    Multipliers: 20,
+    Repetition_probability: 0.5,
+    Lines_nb: 100,
+    Arrangement: 20,
     Max_norm: 200,
     Padding: 80,
+    opacityPlays: true,
     Download_Image: function () { return save(); },
-    Ajouter_Ligne: function () { return params.Lines_nb++; },
+    Add_line: function () { return params.Lines_nb++; },
+    Decrease_opacity: function () { params.opacityPlays = !params.opacityPlays; },
 };
-gui.add(params, "Seed", 1, 50, 1);
+gui.add(params, "Repetition_probability", 0, 1, 0.05);
 gui.add(params, "Lines_nb", 0, 200, 1);
-gui.add(params, "Multipliers", 1, 30, 1);
+gui.add(params, "Arrangement", 1, 30, 1);
 gui.add(params, "Max_norm", 10, 250, 10);
 gui.add(params, "Padding", 0, 200, 10);
 gui.add(params, "Download_Image");
-gui.add(params, "Ajouter_Ligne");
+gui.add(params, "Add_line");
+gui.add(params, "Decrease_opacity");
 var gif_loadImg;
 var fontMenuBold;
 var fontMenuLight;
@@ -107,7 +110,9 @@ function draw() {
         var xNewVector = void 0, yNewVector = void 0;
         rectangle.step();
         rectangle.render();
-        easeBackground();
+        if (params.opacityPlays) {
+            easeBackground();
+        }
         if (repetitionCounter < repetitionNumber) {
             var configTemp = configuration;
             console.log("configRepet : " + configurationRepetition);
@@ -181,7 +186,7 @@ function draw() {
             console.log(configuration);
             var configurationTemp = whatConfiguration(xNewVector, yNewVector);
             console.log("whatconf avant new : " + configurationTemp);
-            randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
+            randomNorm = params.Arrangement * floor(random(0, params.Max_norm) / params.Arrangement);
             plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
@@ -203,11 +208,6 @@ function draw() {
                 return;
             }
             configuration = whatConfiguration(xNewVector, yNewVector);
-            if (random(0, 1) < 0.3) {
-                repetition = true;
-                iterationRepetition = 0;
-                configurationOblique = random(['x', 'y']);
-            }
             console.log("x : " + xNewVector);
             console.log("y : " + yNewVector);
             console.log("-----------");
@@ -219,9 +219,8 @@ function draw() {
             operatorY = plotter.deltaY;
             console.log("opX :" + operatorX + "  opY :" + operatorY);
             operatorRandom = random([-1, 1]);
-            randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
-            var flip3 = random([0, 1, 2]);
-            if (flip3 == 0) {
+            randomLengthOpposite = params.Arrangement * floor(random(10, (params.Max_norm)) / params.Arrangement);
+            if (random(1) < params.Repetition_probability) {
                 repetition = true;
                 repetitionNumber = random([4, 5, 6, 7]);
                 if (configurationRepetition == 'oblique') {
