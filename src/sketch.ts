@@ -9,19 +9,24 @@ const params = {
     Arrangement: 20,
     Max_norm: 200,
     Padding: 80,
+    Mouse_radius: 400,
     opacityPlays: true,
+    drawVisualizer: false,
     Download_Image: () => save(),
     Add_line: () => params.Lines_nb++,
     Decrease_opacity: () => { params.opacityPlays = !params.opacityPlays },
+    Toggle_visualizer: () => { params.drawVisualizer = !params.drawVisualizer },
 }
 gui.add(params, "Repetition_probability", 0, 1, 0.05)
 gui.add(params, "Lines_nb", 0, 200, 1)
 gui.add(params, "Arrangement", 1, 30, 1)
 gui.add(params, "Max_norm", 10, 250, 10)
 gui.add(params, "Padding", 0, 200, 10)
+gui.add(params, "Mouse_radius", 200, 600, 10)
 gui.add(params, "Download_Image")
 gui.add(params, "Add_line")
 gui.add(params, "Decrease_opacity")
+gui.add(params, "Toggle_visualizer")
 
 // -------------------
 //  Initialization
@@ -64,13 +69,15 @@ class rectConstrain {
     }
 
     render() {
-        /*push()
-        stroke(128, 0, 0, 10)
-        strokeWeight(10)
-        noFill()
-        //noStroke()
-        circle(this.x, this.y, this.rayon)
-        pop()*/
+        this.rayon = params.Mouse_radius;
+        if (params.drawVisualizer) {
+            push()
+            stroke(128, 0, 0, 10)
+            strokeWeight(10)
+            noFill()
+            circle(this.x, this.y, this.rayon)
+            pop()
+        }
     }
 
     step() {
@@ -138,20 +145,14 @@ class Plotter {
 //       Drawing
 // -------------------
 
-function easeBackground() {
-    push()
-    noStroke()
-    fill(0, 0, 0, 10)
-    rect(0, 0, width, height)
-    pop()
-}
-
 function draw() {
     if (counter == -1) {
         drawMenu();
+        return;
     }
 
     let canDraw = (counter >= 0 && counter < params.Lines_nb);
+
     if (canDraw) {
         let xNewVector, yNewVector;
 
@@ -308,6 +309,14 @@ function draw() {
             }
         }
     }
+}
+
+function easeBackground() {
+    push()
+    noStroke()
+    fill(0, 0, 0, 10)
+    rect(0, 0, width, height)
+    pop()
 }
 
 function drawLines(newVector) {

@@ -5,19 +5,24 @@ var params = {
     Arrangement: 20,
     Max_norm: 200,
     Padding: 80,
+    Mouse_radius: 400,
     opacityPlays: true,
+    drawVisualizer: false,
     Download_Image: function () { return save(); },
     Add_line: function () { return params.Lines_nb++; },
     Decrease_opacity: function () { params.opacityPlays = !params.opacityPlays; },
+    Toggle_visualizer: function () { params.drawVisualizer = !params.drawVisualizer; },
 };
 gui.add(params, "Repetition_probability", 0, 1, 0.05);
 gui.add(params, "Lines_nb", 0, 200, 1);
 gui.add(params, "Arrangement", 1, 30, 1);
 gui.add(params, "Max_norm", 10, 250, 10);
 gui.add(params, "Padding", 0, 200, 10);
+gui.add(params, "Mouse_radius", 200, 600, 10);
 gui.add(params, "Download_Image");
 gui.add(params, "Add_line");
 gui.add(params, "Decrease_opacity");
+gui.add(params, "Toggle_visualizer");
 var gif_loadImg;
 var fontMenuBold;
 var fontMenuLight;
@@ -44,6 +49,15 @@ var rectConstrain = (function () {
         this.rayon = 400;
     }
     rectConstrain.prototype.render = function () {
+        this.rayon = params.Mouse_radius;
+        if (params.drawVisualizer) {
+            push();
+            stroke(128, 0, 0, 10);
+            strokeWeight(10);
+            noFill();
+            circle(this.x, this.y, this.rayon);
+            pop();
+        }
     };
     rectConstrain.prototype.step = function () {
         this.x = mouseX;
@@ -94,16 +108,10 @@ var Plotter = (function () {
     };
     return Plotter;
 }());
-function easeBackground() {
-    push();
-    noStroke();
-    fill(0, 0, 0, 10);
-    rect(0, 0, width, height);
-    pop();
-}
 function draw() {
     if (counter == -1) {
         drawMenu();
+        return;
     }
     var canDraw = (counter >= 0 && counter < params.Lines_nb);
     if (canDraw) {
@@ -229,6 +237,13 @@ function draw() {
             }
         }
     }
+}
+function easeBackground() {
+    push();
+    noStroke();
+    fill(0, 0, 0, 10);
+    rect(0, 0, width, height);
+    pop();
 }
 function drawLines(newVector) {
     plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x)) / newVector.x;
