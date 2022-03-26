@@ -184,7 +184,7 @@ function draw() {
             iterationRepetition++;
             console.log("x : " + xNewVector);
             console.log("y : " + yNewVector);
-            if (outOfRectangle(xNewVector, yNewVector) != 1) {
+            if (outOfRectangle(xNewVector, yNewVector) === false) {
                 console.log(plotter.mode);
                 repetitionCounter++;
                 drawLines(createVector(xNewVector, yNewVector));
@@ -197,6 +197,7 @@ function draw() {
                 counter--;
                 repetitionNumber = 0;
                 console.log("???????????,");
+                return;
             }
         }
         else {
@@ -211,7 +212,7 @@ function draw() {
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
             console.log("whatconf apres new : " + whatConfiguration(xNewVector, yNewVector));
-            if (outOfRectangle(xNewVector, yNewVector) == 0) {
+            if (outOfRectangle(xNewVector, yNewVector) === false) {
                 console.log("pas outofgrid");
                 if (xNewVector === yNewVector && yNewVector === 0) {
                     noCounter = true;
@@ -274,12 +275,12 @@ function drawLines(newVector) {
 function outOfRectangle(xNewVector, yNewVector) {
     var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
     if (futureVectorCopy.x < rectangle.x - (rectangle.rayon / 3) || futureVectorCopy.x > rectangle.x + (rectangle.rayon / 3)) {
-        return 1;
+        return true;
     }
     if (futureVectorCopy.y < rectangle.y - (rectangle.rayon / 3) || futureVectorCopy.y > rectangle.y + (rectangle.rayon / 3)) {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 function whatConfiguration(xNewVector, yNewVector) {
     if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {

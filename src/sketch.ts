@@ -240,7 +240,7 @@ function draw() {
             console.log("x : " + xNewVector)
             console.log("y : " + yNewVector)
 
-            if (outOfRectangle(xNewVector, yNewVector) != 1) {
+            if (outOfRectangle(xNewVector, yNewVector) === false) {
                 console.log(plotter.mode)
                 repetitionCounter++;
                 drawLines(createVector(xNewVector, yNewVector))
@@ -252,6 +252,7 @@ function draw() {
                 counter--;
                 repetitionNumber = 0;
                 console.log("???????????,")
+                return;
             }
         } else {
             repetitionCounter = 0;
@@ -269,7 +270,7 @@ function draw() {
 
             console.log("whatconf apres new : " + whatConfiguration(xNewVector, yNewVector));
 
-            if (outOfRectangle(xNewVector, yNewVector) == 0) {
+            if (outOfRectangle(xNewVector, yNewVector) === false) {
                 console.log("pas outofgrid")
                 // If the new vector is equal to 0
                 if (xNewVector === yNewVector && yNewVector === 0) {
@@ -345,13 +346,13 @@ function outOfRectangle(xNewVector, yNewVector) {
     let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
 
     if (futureVectorCopy.x < rectangle.x - (rectangle.rayon / 3) || futureVectorCopy.x > rectangle.x + (rectangle.rayon / 3)) {
-        return 1;
+        return true;
     }
     if (futureVectorCopy.y < rectangle.y - (rectangle.rayon / 3) || futureVectorCopy.y > rectangle.y + (rectangle.rayon / 3)) {
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 function whatConfiguration(xNewVector, yNewVector) { //return the actual configuration based on vector's x and y position
