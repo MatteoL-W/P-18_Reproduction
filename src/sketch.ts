@@ -5,159 +5,258 @@
 const gui = new dat.GUI()
 const params = {
     Seed: 1,
+    Repetition_probability: 0.5,
+    Lines_nb: 100,
+    Arrangement: 20,
+    Max_norm: 200,
+    Padding: 80,
     Download_Image: () => save(),
 }
-gui.add(params, "Seed", 1, 50, 1)
-gui.add(params, "Download_Image")
+gui.add(params, "Seed", 0, 100, 1)
+gui.add(params, "Repetition_probability", 0, 1, 0.05)
+gui.add(params, "Lines_nb", 0, 200, 1)
+gui.add(params, "Arrangement", 1, 30, 1)
+gui.add(params, "Max_norm", 10, 250, 10)
+gui.add(params, "Padding", 0, 200, 10)
 
-const PADDING = 10;
-const LINES_NB = 100;
-const MAX_NORM = 200;
+// -------------------
+//     Variables
+// -------------------
 
 let current;
+let plotter;
+let rectangle;
+
+let configuration;
+let configurationOblique;
+let repetition = false;
+let randomNorm;
+let operatorRandom;
+let configurationRepetition;
+let operatorX;
+let operatorY;
+let randomLengthOpposite;
+let repetitionNumber;
+let repetitionCounter;
+
+// -------------------
+//       Classes
+// -------------------
+
+class Plotter {
+    x: number;
+    y: number;
+    deltaX: number;
+    deltaY: number;
+    mode: number;
+
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.deltaX = 0;
+        this.deltaY = 0;
+        this.mode = 0;
+    }
+
+    render() {
+        switch (this.mode) {
+            case 0 : //default -> point
+                point(this.x, this.y)
+                break;
+            case 1 : //1 -> vertical line
+                line(this.x, this.y + 5, this.x, this.y - 5);
+                break;
+            case 2 : //2 -> horizontal line
+                line(this.x - 5, this.y, this.x + 5, this.y);
+                break;
+            case 3 : //2 -> horizontal line for oblique
+                line(this.x, this.y, this.x + 10, this.y);
+                break;
+        }
+    }
+
+    step(newVector) {
+        push()
+        fill("white")
+        stroke("white")
+
+        let distance = newVector.mag();
+        distance = (configuration === 'oblique') ? distance / sqrt(2) : distance;
+
+        for (let i = 0; i < distance * 2; i++) {
+            this.x += this.deltaX / 2;
+            this.y += this.deltaY / 2;
+            this.x = constrain(this.x, params.Padding, width - params.Padding);
+            this.y = constrain(this.y, params.Padding, height - params.Padding);
+
+            this.render();
+        }
+
+        this.x += this.deltaX / 2;
+        this.y += this.deltaY / 2;
+        pop();
+    }
+}
 
 // -------------------
 //       Drawing
 // -------------------
 
-function checkConfiguration(xNewVector, yNewVector, configuration) {
-    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
-        configuration = 'oblique';
-    } else if (xNewVector === 0 && yNewVector != 0) {
-        configuration = 'vertical';
-    } else if (yNewVector === 0 && xNewVector != 0) {
-        configuration = 'horizontal';
-    }
-    return configuration;
-}
-
 function draw() {
+    plotter = new Plotter();
+    plotter.mode = 0;
     randomSeed(params.Seed)
-    background("white")
-
-    let configuration;
-    let repetition = false;
-    let repetitionProbability = 1;
-    let iterationRepetition = 0;
-    let randomNorm;
 
     current = createVector(
-        random(PADDING, width - PADDING),
-        random(PADDING, height - PADDING)
+        random(params.Padding, width - params.Padding),
+        random(params.Padding, height - params.Padding)
     )
 
-    for (let i = 0; i < LINES_NB; i++) {
+    background("black")
+
+    let counter = 0
+    while (counter < params.Lines_nb) {
         let xNewVector, yNewVector;
-        let randomRun = random(0, 1);
+        // Si le prochain tracé est une répétition
+        if (repetitionCounter < repetitionNumber) {
+            let configTemp = configuration;
 
-        if (repetition && randomRun < repetitionProbability) {
-            // Génère l'opérateur (1 ou -1) pour le "rempart" (succession de horizontal / vertical)
-            let operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
+            switch (configurationRepetition) {
+                case 'horizontal':
+                    switch (configuration) {
+                        case 'horizontal':
+                            plotter.mode = 2;
+                            xNewVector = 0;
+                            yNewVector = operatorRandom * randomLengthOpposite;
+                            configuration = 'vertical';
+                            break;
+                        case 'vertical':
+                            current.y--;
+                            plotter.mode = 0;
+                            operatorX *= -1;
+                            xNewVector = operatorX * randomNorm;
+                            yNewVector = 0;
+                            configuration = 'horizontal'
+                            break;
+                    }
+                    break;
 
-            if (configuration === 'horizontal') {
-                xNewVector = 0;
-                yNewVector = operator * randomNorm;
-                configuration = 'vertical';
+                case 'vertical':
+                    switch (configuration) {
+                        case 'vertical':
+                            plotter.mode = 1;
+                            xNewVector = operatorRandom * randomLengthOpposite;
+                            yNewVector = 0;
+                            configuration = 'horizontal'
+                            break;
+                        case 'horizontal':
+                            plotter.mode = 0;
+                            operatorY *= -1;
+                            xNewVector = 0;
+                            yNewVector = operatorY * randomNorm;
+                            configuration = 'vertical';
+                            break;
+                    }
+                    break;
+
+                case 'oblique':
+                    xNewVector = (configurationOblique === 'x') ? -randomNorm * plotter.deltaX : randomNorm * plotter.deltaX
+                    yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY
+                    break;
             }
 
-            else if (configuration === 'vertical') {
-                xNewVector = -operator * randomNorm;
-                yNewVector = 0;
-                configuration = 'horizontal'
+            if (outOfRectangle(xNewVector, yNewVector) === true) {
+                configuration = configTemp;
+                repetition = false;
+                repetitionNumber = 0;
+                continue;
             }
 
-            else if (configuration === 'oblique') {
-                // Génère l'opérateur pour les dents (zigzag)
-                operator = (iterationRepetition % 2 == 0) ? 1 : -1;
-                xNewVector = operator * randomNorm;
-                yNewVector = randomNorm;
-            }
-
-            repetitionProbability -= .2;
-            iterationRepetition++;
-
-            const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
-
-            drawLines(createVector(inGridVector.xNewVector,inGridVector.yNewVector))
+            repetitionCounter++;
+            drawLines(createVector(xNewVector, yNewVector))
+            counter++;
         }
 
+        // Si le prochain tracé n'est pas une répétition
         else {
-            // Only multiplier of 20 to have a structure
-            randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
             repetition = false;
+            repetitionCounter = 0;
+            let configurationTemp = whatConfiguration(xNewVector, yNewVector);
 
-            let xRandom = floor(random(0, 3));
-            let yRandom = floor(random(0, 3));
+            // Only multiplier of MULTIPLIERS to have a structure / grid / arrangement
+            randomNorm = params.Arrangement * floor(random(0, params.Max_norm) / params.Arrangement);
 
-            switch (xRandom) {
-                case 0:
-                    xNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    xNewVector = 0;
-                    break;
-                case 2:
-                    xNewVector = randomNorm;
-                    break;
+            plotter.rotateMode = random([1, 0, 0, 0]);
+            xNewVector = random([-1 * randomNorm, 0, randomNorm]);
+            yNewVector = random([-1 * randomNorm, 0, randomNorm]);
+
+            // -------------------
+            //   Error handling
+            // -------------------
+            if (outOfRectangle(xNewVector, yNewVector) === true
+                || (xNewVector === yNewVector && yNewVector === 0)
+                || (configurationTemp === whatConfiguration(xNewVector, yNewVector))
+                || (whatConfiguration(xNewVector, yNewVector) == undefined)
+            ) {
+                continue;
             }
+            // -------------------
 
-            switch (yRandom) {
-                case 0:
-                    yNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    yNewVector = 0;
-                    break;
-                case 2:
-                    yNewVector = randomNorm;
-                    break;
-            }
-
-            const inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
-            xNewVector = inGridVector.xNewVector;
-            yNewVector = inGridVector.yNewVector;
-
-            configuration = checkConfiguration(xNewVector, yNewVector, configuration);
-
-            // If the new vector is equal to 0
-            if (xNewVector === yNewVector && yNewVector === 0) {
-                i--;
-            }
-
-            // Activate the repetition parameter
-            if (randomRun < 0.3) {
-                repetition = true;
-                repetitionProbability = 1;
-                iterationRepetition = 0;
-            }
+            configuration = whatConfiguration(xNewVector, yNewVector);
+            configurationRepetition = configuration;
 
             drawLines(createVector(xNewVector, yNewVector))
-        }
+            counter++;
 
+            operatorX = plotter.deltaX;
+            operatorY = plotter.deltaY;
+            operatorRandom = random([-1, 1]);
+            randomLengthOpposite = params.Arrangement * floor(random(10, (params.Max_norm)) / params.Arrangement);
+
+            if (random(1) < params.Repetition_probability) {
+                repetition = true;
+                repetitionNumber = random([4, 5, 6, 7]);
+                if (configurationRepetition == 'oblique') {
+                    plotter.mode = random([0, 0, 0, 3])
+                }
+            }
+        }
     }
 }
 
 function drawLines(newVector) {
-    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y)
+    plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x)) / newVector.x;
+    plotter.deltaY = (newVector.y === 0) ? 0 : (abs(newVector.y)) / newVector.y;
+
+    plotter.x = current.x;
+    plotter.y = current.y;
+    plotter.step(newVector);
+
     current.add(newVector);
 }
 
-function avoidOutOfGrid(xNewVector, yNewVector) {
+function outOfRectangle(xNewVector, yNewVector) {
     let futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
 
-    if (futureVectorCopy.x < PADDING) {
-        xNewVector = abs(xNewVector)
-    } else if (futureVectorCopy.x > width - PADDING) {
-        xNewVector = -xNewVector
+    if (futureVectorCopy.x < params.Padding || futureVectorCopy.x > width + params.Padding) {
+        return true;
+    }
+    if (futureVectorCopy.y < params.Padding || futureVectorCopy.y > height + params.Padding) {
+        return true;
     }
 
-    if (futureVectorCopy.y < PADDING) {
-        yNewVector = abs(yNewVector)
-    } else if (futureVectorCopy.y > height - PADDING) {
-        yNewVector = -yNewVector
-    }
+    return false;
+}
 
-    return {xNewVector, yNewVector};
+function whatConfiguration(xNewVector, yNewVector) { //return the actual configuration based on vector's x and y position
+    if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
+        return 'oblique';
+    } else if (xNewVector === 0 && yNewVector != 0) {
+        return 'vertical';
+    } else if (yNewVector === 0 && xNewVector != 0) {
+        return 'horizontal';
+    }
+    return configuration;
 }
 
 // -------------------
