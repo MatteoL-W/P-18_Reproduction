@@ -25,7 +25,6 @@ var rectangle;
 var configuration;
 var configurationOblique;
 var repetition = false;
-var repetitionProbability = 1;
 var iterationRepetition = 0;
 var randomNorm;
 var operatorRandom;
@@ -45,6 +44,7 @@ var rectConstrain = (function () {
         push();
         stroke(128, 0, 128, 1);
         strokeWeight(10);
+        color("red");
         noFill();
         circle(this.x, this.y, this.rayon);
         pop();
@@ -104,9 +104,9 @@ function draw() {
         push();
         stroke("black");
         strokeWeight(2);
+        textAlign(CENTER);
         imageMode(CENTER);
         image(gif_loadImg, width / 2, height / 2);
-        textAlign(CENTER);
         textSize(50);
         textFont(fontMenuBold);
         text("Start", width / 2, 250);
@@ -115,7 +115,8 @@ function draw() {
         text("Bougez la souris lentement !", width / 2, 800);
         pop();
     }
-    if (counter >= 0 && counter < params.Lines_nb) {
+    var canDraw = (counter >= 0 && counter < params.Lines_nb);
+    if (canDraw) {
         rectangle.step();
         rectangle.render();
         push();
@@ -124,7 +125,6 @@ function draw() {
         rect(0, 0, width, height);
         pop();
         var xNewVector = void 0, yNewVector = void 0;
-        var randomRun = random(0, 1);
         if (repetitionCounter < repetitionNumber) {
             var configTemp = configuration;
             console.log("configRepet : " + configurationRepetition);
@@ -174,9 +174,7 @@ function draw() {
                     break;
             }
             console.log("REPETITION : " + configuration);
-            repetitionProbability -= .2;
             iterationRepetition++;
-            var inGridVector = outOfGrid(xNewVector, yNewVector);
             console.log("x : " + xNewVector);
             console.log("y : " + yNewVector);
             if (outOfRectangle(xNewVector, yNewVector) != 1) {
@@ -223,9 +221,8 @@ function draw() {
                 }
                 else {
                     configuration = whatConfiguration(xNewVector, yNewVector);
-                    if (randomRun < 1) {
+                    if (random(0, 1) < 0.5) {
                         repetition = true;
-                        repetitionProbability = 1;
                         iterationRepetition = 0;
                         configurationOblique = random(['x', 'y']);
                     }
@@ -266,16 +263,6 @@ function drawLines(newVector) {
     plotter.y = current.y;
     plotter.step(newVector);
     current.add(newVector);
-}
-function outOfGrid(xNewVector, yNewVector) {
-    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-    if (futureVectorCopy.x < params.Padding || futureVectorCopy.x > width - params.Padding) {
-        return 1;
-    }
-    if (futureVectorCopy.y < params.Padding || futureVectorCopy.y > height - params.Padding) {
-        return 1;
-    }
-    return 0;
 }
 function outOfRectangle(xNewVector, yNewVector) {
     var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
