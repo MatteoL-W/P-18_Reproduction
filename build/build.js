@@ -185,20 +185,14 @@ function draw() {
             plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
-            if (outOfRectangle(xNewVector, yNewVector) === true) {
-                return;
-            }
-            if (xNewVector === yNewVector && yNewVector === 0) {
-                return;
-            }
-            if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
-                return;
-            }
-            if (whatConfiguration(xNewVector, yNewVector) == undefined) {
+            if (outOfRectangle(xNewVector, yNewVector) === true
+                || (xNewVector === yNewVector && yNewVector === 0)
+                || (configurationTemp === whatConfiguration(xNewVector, yNewVector))
+                || (whatConfiguration(xNewVector, yNewVector) == undefined)) {
                 return;
             }
             configuration = whatConfiguration(xNewVector, yNewVector);
-            configurationRepetition = whatConfiguration(xNewVector, yNewVector);
+            configurationRepetition = configuration;
             drawLines(createVector(xNewVector, yNewVector));
             counter++;
             operatorX = plotter.deltaX;

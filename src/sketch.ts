@@ -242,28 +242,17 @@ function draw() {
             // -------------------
             //   Error handling
             // -------------------
-            if (outOfRectangle(xNewVector, yNewVector) === true) {
+            if (outOfRectangle(xNewVector, yNewVector) === true
+                || (xNewVector === yNewVector && yNewVector === 0)
+                || (configurationTemp === whatConfiguration(xNewVector, yNewVector))
+                || (whatConfiguration(xNewVector, yNewVector) == undefined)
+            ) {
                 return;
             }
-
-            if (xNewVector === yNewVector && yNewVector === 0) {
-                return;
-            }
-
-            if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
-                return;
-            }
-
-            if (whatConfiguration(xNewVector, yNewVector) == undefined) {
-                return;
-            }
-
             // -------------------
 
-            // Draw the lines only if the xNewVector is new
             configuration = whatConfiguration(xNewVector, yNewVector);
-
-            configurationRepetition = whatConfiguration(xNewVector, yNewVector);
+            configurationRepetition = configuration;
 
             drawLines(createVector(xNewVector, yNewVector))
             counter++;
