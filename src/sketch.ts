@@ -61,14 +61,13 @@ class rectConstrain {
     }
 
     render() {
-        push()
-        stroke(128, 0, 128, 1)
+        /*push()
+        stroke(128, 0, 0, 10)
         strokeWeight(10)
-        color("red")
         noFill()
         //noStroke()
         circle(this.x, this.y, this.rayon)
-        pop()
+        pop()*/
     }
 
     step() {
@@ -137,8 +136,7 @@ class Plotter {
 // -------------------
 
 function draw() {
-    let noCounter = false;
-
+    console.log(counter)
     if (counter == -1) {
         //Menu
         push()
@@ -170,6 +168,8 @@ function draw() {
 
     let canDraw = (counter >= 0 && counter < params.Lines_nb);
     if (canDraw) {
+        let xNewVector, yNewVector;
+
         rectangle.step()
         rectangle.render();
 
@@ -178,8 +178,6 @@ function draw() {
         fill(0, 0, 0, 10)
         rect(0, 0, width, height)
         pop()
-
-        let xNewVector, yNewVector;
 
         // Si le prochain tracé est une répétition
         if (repetitionCounter < repetitionNumber) {
@@ -245,7 +243,6 @@ function draw() {
                 console.log("-----------")
                 configuration = configTemp;
                 repetition = false;
-                counter--;
                 repetitionNumber = 0;
                 console.log("???????????,")
                 return;
@@ -254,7 +251,7 @@ function draw() {
             console.log(plotter.mode)
             repetitionCounter++;
             drawLines(createVector(xNewVector, yNewVector))
-
+            counter++;
         }
 
         // Si le prochain tracé n'est pas une répétition
@@ -274,65 +271,63 @@ function draw() {
 
             console.log("whatconf apres new : " + whatConfiguration(xNewVector, yNewVector));
 
+            // -------------------
+            //   Error handling
+            // -------------------
             if (outOfRectangle(xNewVector, yNewVector) === true) {
-                if (counter > 2) {
-                    counter--;
-                }
+                return;
+            }
+            // If the new vector is equal to 0
+            if (xNewVector === yNewVector && yNewVector === 0) {
+                console.log("vecteur nul")
+                console.log(configuration)
                 return;
             }
 
-            console.log("pas outofgrid")
-            // If the new vector is equal to 0
-            if (xNewVector === yNewVector && yNewVector === 0) {
-                noCounter = true;
-                console.log("vecteur nul")
-                console.log(configuration)
-            } else if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
-                noCounter = true;
+            if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
                 console.log("vecteur colinéaire")
-            } else if (whatConfiguration(xNewVector, yNewVector) == undefined) {
-                noCounter = true;
+                return;
+            }
+
+            if (whatConfiguration(xNewVector, yNewVector) == undefined) {
                 console.log("jsp")
+                return;
             }
 
             // Draw the lines only if the xNewVector is new
-            else {
-                configuration = whatConfiguration(xNewVector, yNewVector);
-                // Activate the repetition parameter
-                if (random(0, 1) < 0.5) {
-                    repetition = true;
-                    iterationRepetition = 0;
-                    configurationOblique = random(['x', 'y'])
-                }
+            configuration = whatConfiguration(xNewVector, yNewVector);
 
-                console.log("x : " + xNewVector)
-                console.log("y : " + yNewVector)
-                console.log("-----------")
+            // Activate the repetition parameter
+            if (random(0, 1) < 0.5) {
+                repetition = true;
+                iterationRepetition = 0;
+                configurationOblique = random(['x', 'y'])
+            }
 
-                configurationRepetition = whatConfiguration(xNewVector, yNewVector);
-                console.log("operatorRandom : " + operatorRandom);
+            console.log("x : " + xNewVector)
+            console.log("y : " + yNewVector)
+            console.log("-----------")
 
-                drawLines(createVector(xNewVector, yNewVector))
+            configurationRepetition = whatConfiguration(xNewVector, yNewVector);
+            console.log("operatorRandom : " + operatorRandom);
 
-                operatorX = plotter.deltaX;
-                operatorY = plotter.deltaY;
-                console.log("opX :" + operatorX + "  opY :" + operatorY)
-                operatorRandom = random([-1, 1]);
-                randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
+            drawLines(createVector(xNewVector, yNewVector))
+            counter++;
 
-                let flip3 = random([0, 1, 2])
-                if (flip3 == 0) {
-                    repetition = true;
-                    repetitionNumber = random([4, 5, 6, 7]);
-                    if (configurationRepetition == 'oblique') {
-                        plotter.mode = random([0, 0, 0, 3])
-                    }
+            operatorX = plotter.deltaX;
+            operatorY = plotter.deltaY;
+            console.log("opX :" + operatorX + "  opY :" + operatorY)
+            operatorRandom = random([-1, 1]);
+            randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
+
+            let flip3 = random([0, 1, 2])
+            if (flip3 == 0) {
+                repetition = true;
+                repetitionNumber = random([4, 5, 6, 7]);
+                if (configurationRepetition == 'oblique') {
+                    plotter.mode = random([0, 0, 0, 3])
                 }
             }
-        }
-        if (!noCounter) {
-            // S'il n'y a pas de problèmes, on incrémente counter
-            counter++;
         }
     }
 }

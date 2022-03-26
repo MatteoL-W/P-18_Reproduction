@@ -41,13 +41,6 @@ var rectConstrain = (function () {
         this.rayon = 400;
     }
     rectConstrain.prototype.render = function () {
-        push();
-        stroke(128, 0, 128, 1);
-        strokeWeight(10);
-        color("red");
-        noFill();
-        circle(this.x, this.y, this.rayon);
-        pop();
     };
     rectConstrain.prototype.step = function () {
         this.x = mouseX;
@@ -99,7 +92,7 @@ var Plotter = (function () {
     return Plotter;
 }());
 function draw() {
-    var noCounter = false;
+    console.log(counter);
     if (counter == -1) {
         push();
         stroke("black");
@@ -124,6 +117,7 @@ function draw() {
     }
     var canDraw = (counter >= 0 && counter < params.Lines_nb);
     if (canDraw) {
+        var xNewVector = void 0, yNewVector = void 0;
         rectangle.step();
         rectangle.render();
         push();
@@ -131,7 +125,6 @@ function draw() {
         fill(0, 0, 0, 10);
         rect(0, 0, width, height);
         pop();
-        var xNewVector = void 0, yNewVector = void 0;
         if (repetitionCounter < repetitionNumber) {
             var configTemp = configuration;
             console.log("configRepet : " + configurationRepetition);
@@ -189,7 +182,6 @@ function draw() {
                 console.log("-----------");
                 configuration = configTemp;
                 repetition = false;
-                counter--;
                 repetitionNumber = 0;
                 console.log("???????????,");
                 return;
@@ -197,6 +189,7 @@ function draw() {
             console.log(plotter.mode);
             repetitionCounter++;
             drawLines(createVector(xNewVector, yNewVector));
+            counter++;
         }
         else {
             repetitionCounter = 0;
@@ -211,55 +204,47 @@ function draw() {
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
             console.log("whatconf apres new : " + whatConfiguration(xNewVector, yNewVector));
             if (outOfRectangle(xNewVector, yNewVector) === true) {
-                if (counter > 2) {
-                    counter--;
-                }
                 return;
             }
-            console.log("pas outofgrid");
             if (xNewVector === yNewVector && yNewVector === 0) {
-                noCounter = true;
                 console.log("vecteur nul");
                 console.log(configuration);
+                return;
             }
-            else if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
-                noCounter = true;
+            if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
                 console.log("vecteur colinéaire");
+                return;
             }
-            else if (whatConfiguration(xNewVector, yNewVector) == undefined) {
-                noCounter = true;
+            if (whatConfiguration(xNewVector, yNewVector) == undefined) {
                 console.log("jsp");
+                return;
             }
-            else {
-                configuration = whatConfiguration(xNewVector, yNewVector);
-                if (random(0, 1) < 0.5) {
-                    repetition = true;
-                    iterationRepetition = 0;
-                    configurationOblique = random(['x', 'y']);
-                }
-                console.log("x : " + xNewVector);
-                console.log("y : " + yNewVector);
-                console.log("-----------");
-                configurationRepetition = whatConfiguration(xNewVector, yNewVector);
-                console.log("operatorRandom : " + operatorRandom);
-                drawLines(createVector(xNewVector, yNewVector));
-                operatorX = plotter.deltaX;
-                operatorY = plotter.deltaY;
-                console.log("opX :" + operatorX + "  opY :" + operatorY);
-                operatorRandom = random([-1, 1]);
-                randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
-                var flip3 = random([0, 1, 2]);
-                if (flip3 == 0) {
-                    repetition = true;
-                    repetitionNumber = random([4, 5, 6, 7]);
-                    if (configurationRepetition == 'oblique') {
-                        plotter.mode = random([0, 0, 0, 3]);
-                    }
-                }
+            configuration = whatConfiguration(xNewVector, yNewVector);
+            if (random(0, 1) < 0.5) {
+                repetition = true;
+                iterationRepetition = 0;
+                configurationOblique = random(['x', 'y']);
             }
-        }
-        if (!noCounter) {
+            console.log("x : " + xNewVector);
+            console.log("y : " + yNewVector);
+            console.log("-----------");
+            configurationRepetition = whatConfiguration(xNewVector, yNewVector);
+            console.log("operatorRandom : " + operatorRandom);
+            drawLines(createVector(xNewVector, yNewVector));
             counter++;
+            operatorX = plotter.deltaX;
+            operatorY = plotter.deltaY;
+            console.log("opX :" + operatorX + "  opY :" + operatorY);
+            operatorRandom = random([-1, 1]);
+            randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
+            var flip3 = random([0, 1, 2]);
+            if (flip3 == 0) {
+                repetition = true;
+                repetitionNumber = random([4, 5, 6, 7]);
+                if (configurationRepetition == 'oblique') {
+                    plotter.mode = random([0, 0, 0, 3]);
+                }
+            }
         }
     }
 }
