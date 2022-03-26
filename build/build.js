@@ -91,40 +91,23 @@ var Plotter = (function () {
     };
     return Plotter;
 }());
+function easeBackground() {
+    push();
+    noStroke();
+    fill(0, 0, 0, 10);
+    rect(0, 0, width, height);
+    pop();
+}
 function draw() {
-    console.log(counter);
     if (counter == -1) {
-        push();
-        stroke("black");
-        strokeWeight(2);
-        imageMode(CENTER);
-        image(gif_loadImg, width / 2, height / 2);
-        pop();
-        push();
-        fill("pink");
-        textAlign(CENTER);
-        textSize(50);
-        textFont(fontMenuBold);
-        rotate(frameCount / 1000, [90]);
-        text("Start", width / 2, 250);
-        pop();
-        push();
-        rotate(frameCount);
-        textSize(30);
-        textFont(fontMenuLight);
-        text("Bougez la souris lentement !", width / 2, 800);
-        pop();
+        drawMenu();
     }
     var canDraw = (counter >= 0 && counter < params.Lines_nb);
     if (canDraw) {
         var xNewVector = void 0, yNewVector = void 0;
         rectangle.step();
         rectangle.render();
-        push();
-        noStroke();
-        fill(0, 0, 0, 10);
-        rect(0, 0, width, height);
-        pop();
+        easeBackground();
         if (repetitionCounter < repetitionNumber) {
             var configTemp = configuration;
             console.log("configRepet : " + configurationRepetition);
@@ -192,13 +175,13 @@ function draw() {
             counter++;
         }
         else {
+            repetition = false;
             repetitionCounter = 0;
             console.log("NORMAL");
             console.log(configuration);
             var configurationTemp = whatConfiguration(xNewVector, yNewVector);
             console.log("whatconf avant new : " + configurationTemp);
             randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
-            repetition = false;
             plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
@@ -220,7 +203,7 @@ function draw() {
                 return;
             }
             configuration = whatConfiguration(xNewVector, yNewVector);
-            if (random(0, 1) < 0.5) {
+            if (random(0, 1) < 0.3) {
                 repetition = true;
                 iterationRepetition = 0;
                 configurationOblique = random(['x', 'y']);
@@ -277,6 +260,28 @@ function whatConfiguration(xNewVector, yNewVector) {
         return 'horizontal';
     }
     return configuration;
+}
+function drawMenu() {
+    push();
+    stroke("black");
+    strokeWeight(2);
+    imageMode(CENTER);
+    image(gif_loadImg, width / 2, height / 2);
+    pop();
+    push();
+    fill("pink");
+    textAlign(CENTER);
+    textSize(50);
+    textFont(fontMenuBold);
+    rotate(frameCount / 1000, [90]);
+    text("Start", width / 2, 250);
+    pop();
+    push();
+    rotate(frameCount);
+    textSize(30);
+    textFont(fontMenuLight);
+    text("Bougez la souris lentement !", width / 2, 800);
+    pop();
 }
 function preload() {
     gif_loadImg = loadImage("https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g");

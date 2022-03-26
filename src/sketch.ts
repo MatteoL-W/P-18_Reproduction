@@ -135,35 +135,17 @@ class Plotter {
 //       Drawing
 // -------------------
 
+function easeBackground() {
+    push()
+    noStroke()
+    fill(0, 0, 0, 10)
+    rect(0, 0, width, height)
+    pop()
+}
+
 function draw() {
-    console.log(counter)
     if (counter == -1) {
-        //Menu
-        push()
-        stroke("black")
-        strokeWeight(2)
-        //rect(width/2-300,height/2-150,600,300)
-        imageMode(CENTER)
-        image(gif_loadImg, width / 2, height / 2);
-        pop()
-
-        push()
-        fill("pink")
-        textAlign(CENTER)
-        textSize(50)
-        textFont(fontMenuBold)
-        rotate(frameCount / 1000, [90]);
-        //rotateZ(frameCount / 1234);
-        //translate(0,-250,0)
-        text("Start", width / 2, 250)
-        pop()
-
-        push()
-        rotate(frameCount);
-        textSize(30)
-        textFont(fontMenuLight)
-        text("Bougez la souris lentement !", width / 2, 800)
-        pop()
+        drawMenu();
     }
 
     let canDraw = (counter >= 0 && counter < params.Lines_nb);
@@ -173,11 +155,7 @@ function draw() {
         rectangle.step()
         rectangle.render();
 
-        push()
-        noStroke()
-        fill(0, 0, 0, 10)
-        rect(0, 0, width, height)
-        pop()
+        easeBackground();
 
         // Si le prochain tracé est une répétition
         if (repetitionCounter < repetitionNumber) {
@@ -256,14 +234,14 @@ function draw() {
 
         // Si le prochain tracé n'est pas une répétition
         else {
+            repetition = false;
             repetitionCounter = 0;
             console.log("NORMAL")
             console.log(configuration)
             let configurationTemp = whatConfiguration(xNewVector, yNewVector);
             console.log("whatconf avant new : " + configurationTemp);
-            // Only multiplier of MULTIPLIERS to have a structure
+            // Only multiplier of MULTIPLIERS to have a structure / grid
             randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
-            repetition = false;
 
             plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
@@ -277,6 +255,7 @@ function draw() {
             if (outOfRectangle(xNewVector, yNewVector) === true) {
                 return;
             }
+
             // If the new vector is equal to 0
             if (xNewVector === yNewVector && yNewVector === 0) {
                 console.log("vecteur nul")
@@ -294,11 +273,13 @@ function draw() {
                 return;
             }
 
+            // -------------------
+
             // Draw the lines only if the xNewVector is new
             configuration = whatConfiguration(xNewVector, yNewVector);
 
             // Activate the repetition parameter
-            if (random(0, 1) < 0.5) {
+            if (random(0, 1) < 0.3) {
                 repetition = true;
                 iterationRepetition = 0;
                 configurationOblique = random(['x', 'y'])
@@ -365,6 +346,34 @@ function whatConfiguration(xNewVector, yNewVector) { //return the actual configu
         return 'horizontal';
     }
     return configuration;
+}
+
+function drawMenu() {
+    push()
+    stroke("black")
+    strokeWeight(2)
+    //rect(width/2-300,height/2-150,600,300)
+    imageMode(CENTER)
+    image(gif_loadImg, width / 2, height / 2);
+    pop()
+
+    push()
+    fill("pink")
+    textAlign(CENTER)
+    textSize(50)
+    textFont(fontMenuBold)
+    rotate(frameCount / 1000, [90]);
+    //rotateZ(frameCount / 1234);
+    //translate(0,-250,0)
+    text("Start", width / 2, 250)
+    pop()
+
+    push()
+    rotate(frameCount);
+    textSize(30)
+    textFont(fontMenuLight)
+    text("Bougez la souris lentement !", width / 2, 800)
+    pop()
 }
 
 // -------------------
