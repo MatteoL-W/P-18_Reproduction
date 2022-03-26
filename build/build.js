@@ -8,6 +8,7 @@ var params = {
     Mouse_radius: 400,
     opacityPlays: true,
     drawVisualizer: false,
+    invertedColor: false,
     Download_Image: function () { return save(); },
     Add_line: function () { return params.Lines_nb++; },
     Decrease_opacity: function () {
@@ -15,6 +16,9 @@ var params = {
     },
     Toggle_visualizer: function () {
         params.drawVisualizer = !params.drawVisualizer;
+    },
+    Inverse_color: function () {
+        params.invertedColor = !params.invertedColor;
     },
 };
 gui.add(params, "Repetition_probability", 0, 1, 0.05);
@@ -27,6 +31,7 @@ gui.add(params, "Download_Image");
 gui.add(params, "Add_line");
 gui.add(params, "Decrease_opacity");
 gui.add(params, "Toggle_visualizer");
+gui.add(params, "Inverse_color");
 var gif_loadImg;
 var fontMenuBold;
 var fontMenuLight;
@@ -94,8 +99,8 @@ var Plotter = (function () {
     };
     Plotter.prototype.step = function (newVector) {
         push();
-        fill("white");
-        stroke("white");
+        fill((params.invertedColor ? "white" : "black"));
+        stroke((params.invertedColor ? "white" : "black"));
         var distance = newVector.mag();
         distance = (configuration === 'oblique') ? distance / sqrt(2) : distance;
         for (var i = 0; i < distance * 2; i++) {
@@ -212,7 +217,8 @@ function draw() {
 function easeBackground() {
     push();
     noStroke();
-    fill(0, 0, 0, 3);
+    var color = (params.invertedColor ? [0, 0, 0, 3] : [255, 255, 255, 3]);
+    fill(color);
     rect(0, 0, width, height);
     pop();
 }
@@ -248,7 +254,7 @@ function whatConfiguration(xNewVector, yNewVector) {
 }
 function drawMenu() {
     push();
-    stroke("black");
+    stroke((params.invertedColor ? "black" : "white"));
     strokeWeight(2);
     imageMode(CENTER);
     image(gif_loadImg, width / 2, height / 2);
@@ -288,7 +294,7 @@ function windowResized() {
 function mousePressed() {
     if (counter == -1) {
         clear();
-        background("black");
+        background((params.invertedColor ? "black" : "white"));
         counter++;
     }
 }

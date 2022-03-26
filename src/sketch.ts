@@ -12,6 +12,7 @@ const params = {
     Mouse_radius: 400,
     opacityPlays: true,
     drawVisualizer: false,
+    invertedColor: false,
     Download_Image: () => save(),
     Add_line: () => params.Lines_nb++,
     Decrease_opacity: () => {
@@ -19,6 +20,9 @@ const params = {
     },
     Toggle_visualizer: () => {
         params.drawVisualizer = !params.drawVisualizer
+    },
+    Inverse_color: () => {
+        params.invertedColor = !params.invertedColor
     },
 }
 gui.add(params, "Repetition_probability", 0, 1, 0.05)
@@ -31,6 +35,7 @@ gui.add(params, "Download_Image")
 gui.add(params, "Add_line")
 gui.add(params, "Decrease_opacity")
 gui.add(params, "Toggle_visualizer")
+gui.add(params, "Inverse_color")
 
 // -------------------
 //  Initialization
@@ -123,8 +128,8 @@ class Plotter {
 
     step(newVector) {
         push()
-        fill("white")
-        stroke("white")
+        fill((params.invertedColor ? "white" : "black"))
+        stroke((params.invertedColor ? "white" : "black"))
 
         let distance = newVector.mag();
         distance = (configuration === 'oblique') ? distance / sqrt(2) : distance;
@@ -276,7 +281,8 @@ function draw() {
 function easeBackground() {
     push()
     noStroke()
-    fill(0, 0, 0, 3)
+    let color = (params.invertedColor ? [0, 0, 0, 3] : [255, 255, 255, 3] )
+    fill(color)
     rect(0, 0, width, height)
     pop()
 }
@@ -318,7 +324,7 @@ function whatConfiguration(xNewVector, yNewVector) { //return the actual configu
 
 function drawMenu() {
     push()
-    stroke("black")
+    stroke((params.invertedColor ? "black" : "white" ))
     strokeWeight(2)
     //rect(width/2-300,height/2-150,600,300)
     imageMode(CENTER)
@@ -374,7 +380,7 @@ function windowResized() {
 function mousePressed() {
     if (counter == -1) {
         clear();
-        background("black")
+        background((params.invertedColor ? "black" : "white" ))
         counter++;
     }
 }
