@@ -41,6 +41,7 @@ gui.add(params, "Inverse_color")
 //  Initialization
 // -------------------
 
+let imgDOM;
 let gif_loadImg;
 let fontMenuBold;
 let fontMenuLight;
@@ -328,7 +329,6 @@ function drawMenu() {
     strokeWeight(2)
     //rect(width/2-300,height/2-150,600,300)
     imageMode(CENTER)
-    image(gif_loadImg, width / 2, height / 2);
     pop()
 
     push()
@@ -354,13 +354,17 @@ function drawMenu() {
 //    Initialization
 // -------------------
 function preload() {
-    gif_loadImg = loadImage("https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g");
+    gif_loadImg = "https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g"
     fontMenuBold = loadFont("./font/Noto_Sans_JP/NotoSansJP-Black.otf");
     fontMenuLight = loadFont("./font/Noto_Sans_JP/NotoSansJP-Thin.otf");
 }
 
 function setup() {
     p6_CreateCanvas();
+    imageMode(CENTER)
+    imgDOM = createImg(gif_loadImg, 'test');
+    imgDOM.position(width/2, height/2)
+
     plotter = new Plotter();
     plotter.mode = 0;
     background("white")
@@ -380,6 +384,7 @@ function windowResized() {
 function mousePressed() {
     if (counter == -1) {
         clear();
+        imgDOM.hide();
         background((params.invertedColor ? "black" : "white" ))
         counter++;
     }
