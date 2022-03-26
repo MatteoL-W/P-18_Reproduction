@@ -139,25 +139,32 @@ class Plotter {
 function draw() {
     let noCounter = false;
 
-    // Drawing the menu
     if (counter == -1) {
+        //Menu
         push()
-
         stroke("black")
         strokeWeight(2)
         //rect(width/2-300,height/2-150,600,300)
-        textAlign(CENTER)
         imageMode(CENTER)
         image(gif_loadImg, width / 2, height / 2);
+        pop()
 
+        push()
+        fill("pink")
+        textAlign(CENTER)
         textSize(50)
         textFont(fontMenuBold)
+        rotate(frameCount / 1000, [90]);
+        //rotateZ(frameCount / 1234);
+        //translate(0,-250,0)
         text("Start", width / 2, 250)
+        pop()
 
+        push()
+        rotate(frameCount);
         textSize(30)
         textFont(fontMenuLight)
         text("Bougez la souris lentement !", width / 2, 800)
-
         pop()
     }
 
@@ -398,5 +405,4 @@ function mousePressed() {
 function animationMenu() {
     current.x = width / 2 - 200
     current.y = height / 2 + 100
-
 }
