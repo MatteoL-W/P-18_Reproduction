@@ -10,8 +10,12 @@ var params = {
     drawVisualizer: false,
     Download_Image: function () { return save(); },
     Add_line: function () { return params.Lines_nb++; },
-    Decrease_opacity: function () { params.opacityPlays = !params.opacityPlays; },
-    Toggle_visualizer: function () { params.drawVisualizer = !params.drawVisualizer; },
+    Decrease_opacity: function () {
+        params.opacityPlays = !params.opacityPlays;
+    },
+    Toggle_visualizer: function () {
+        params.drawVisualizer = !params.drawVisualizer;
+    },
 };
 gui.add(params, "Repetition_probability", 0, 1, 0.05);
 gui.add(params, "Lines_nb", 0, 200, 1);
@@ -33,7 +37,6 @@ var rectangle;
 var configuration;
 var configurationOblique;
 var repetition = false;
-var iterationRepetition = 0;
 var randomNorm;
 var operatorRandom;
 var configurationRepetition;
@@ -123,15 +126,12 @@ function draw() {
         }
         if (repetitionCounter < repetitionNumber) {
             var configTemp = configuration;
-            console.log("configRepet : " + configurationRepetition);
             switch (configurationRepetition) {
                 case 'horizontal':
                     switch (configuration) {
                         case 'horizontal':
                             plotter.mode = 2;
                             xNewVector = 0;
-                            console.log("!!! : " + operatorRandom);
-                            console.log("randomLengthOpposite : " + randomLengthOpposite);
                             yNewVector = operatorRandom * randomLengthOpposite;
                             configuration = 'vertical';
                             break;
@@ -150,8 +150,6 @@ function draw() {
                         case 'vertical':
                             plotter.mode = 1;
                             xNewVector = operatorRandom * randomLengthOpposite;
-                            console.log("!!! : " + operatorRandom);
-                            console.log("randomLengthOpposite : " + randomLengthOpposite);
                             yNewVector = 0;
                             configuration = 'horizontal';
                             break;
@@ -169,20 +167,12 @@ function draw() {
                     yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY;
                     break;
             }
-            console.log("REPETITION : " + configuration);
-            iterationRepetition++;
-            console.log("x : " + xNewVector);
-            console.log("y : " + yNewVector);
             if (outOfRectangle(xNewVector, yNewVector) === true) {
-                console.log("repetition out of grid");
-                console.log("-----------");
                 configuration = configTemp;
                 repetition = false;
                 repetitionNumber = 0;
-                console.log("???????????,");
                 return;
             }
-            console.log(plotter.mode);
             repetitionCounter++;
             drawLines(createVector(xNewVector, yNewVector));
             counter++;
@@ -190,42 +180,29 @@ function draw() {
         else {
             repetition = false;
             repetitionCounter = 0;
-            console.log("NORMAL");
-            console.log(configuration);
             var configurationTemp = whatConfiguration(xNewVector, yNewVector);
-            console.log("whatconf avant new : " + configurationTemp);
             randomNorm = params.Arrangement * floor(random(0, params.Max_norm) / params.Arrangement);
             plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
-            console.log("whatconf apres new : " + whatConfiguration(xNewVector, yNewVector));
             if (outOfRectangle(xNewVector, yNewVector) === true) {
                 return;
             }
             if (xNewVector === yNewVector && yNewVector === 0) {
-                console.log("vecteur nul");
-                console.log(configuration);
                 return;
             }
             if (configurationTemp === whatConfiguration(xNewVector, yNewVector)) {
-                console.log("vecteur colinéaire");
                 return;
             }
             if (whatConfiguration(xNewVector, yNewVector) == undefined) {
-                console.log("jsp");
                 return;
             }
             configuration = whatConfiguration(xNewVector, yNewVector);
-            console.log("x : " + xNewVector);
-            console.log("y : " + yNewVector);
-            console.log("-----------");
             configurationRepetition = whatConfiguration(xNewVector, yNewVector);
-            console.log("operatorRandom : " + operatorRandom);
             drawLines(createVector(xNewVector, yNewVector));
             counter++;
             operatorX = plotter.deltaX;
             operatorY = plotter.deltaY;
-            console.log("opX :" + operatorX + "  opY :" + operatorY);
             operatorRandom = random([-1, 1]);
             randomLengthOpposite = params.Arrangement * floor(random(10, (params.Max_norm)) / params.Arrangement);
             if (random(1) < params.Repetition_probability) {
@@ -241,7 +218,7 @@ function draw() {
 function easeBackground() {
     push();
     noStroke();
-    fill(0, 0, 0, 10);
+    fill(0, 0, 0, 3);
     rect(0, 0, width, height);
     pop();
 }
@@ -317,8 +294,6 @@ function windowResized() {
 function mousePressed() {
     if (counter == -1) {
         clear();
-        console.log("current.x" + current.x);
-        console.log("current.y" + current.y);
         background("black");
         counter++;
     }
