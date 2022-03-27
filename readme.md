@@ -28,5 +28,5 @@ A local version will now be running at [localhost:3000](http://localhost:3000)
 
 ### View it online:
 
-[New](https://p-18.matteo-leclercq.fr/)
-[Old](https://p-18-old.github.com/MatteoL-W)
+[New](http://p-18.matteo-leclercq.fr/)
+[Old](http://p-18-old.matteo-leclercq.fr/)
