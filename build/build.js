@@ -41,6 +41,7 @@ var current;
 var plotter;
 var counter = -1;
 var rectangle;
+var time;
 var configuration;
 var configurationOblique;
 var repetition = false;
@@ -120,6 +121,7 @@ var Plotter = (function () {
 }());
 function draw() {
     if (counter == -1) {
+        time = millis();
         drawMenu();
         return;
     }
@@ -261,28 +263,43 @@ function drawMenu() {
     imageMode(CENTER);
     pop();
     push();
+    var time = millis();
+    console.log(time);
+    rotate(frameCount);
     fill("pink");
     textAlign(CENTER);
-    textSize(50);
+    textSize(30);
     textFont(fontMenuBold);
-    rotate(frameCount / 1000, [90]);
-    text("Start", width / 2, 250);
+    text("Rom1", 150, 150);
     pop();
     push();
+    fill("blue");
+    translate(width, height);
     rotate(frameCount);
+    textAlign(CENTER);
+    textSize(30);
+    textFont(fontMenuBold);
+    text("Mattéo", (width / 2) - 300, (height / 2) - 300);
+    pop();
+    push();
+    fill("grey");
+    translate(width / 2, height / 2 + 100);
+    textAlign(CENTER);
     textSize(30);
     textFont(fontMenuLight);
-    text("Bougez la souris lentement !", width / 2, 800);
+    text("Cliquez pour commencer\nPuis bougez la souris lentement...", 0, 0);
     pop();
 }
 function preload() {
-    gif_loadImg = "https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g";
+    gif_loadImg = "https://media2.giphy.com/media/3WHGMKF9ngxihOR1Hj/giphy.gif?cid=790b7611f0f0a5fabd7a128e44bd0c295331c35c96234770&rid=giphy.gif&ct=g";
     fontMenuBold = loadFont("./font/Noto_Sans_JP/NotoSansJP-Black.otf");
     fontMenuLight = loadFont("./font/Noto_Sans_JP/NotoSansJP-Thin.otf");
 }
 function setup() {
     p6_CreateCanvas();
     imageMode(CENTER);
+    imgDOM = createImg(gif_loadImg, 'test');
+    imgDOM.position(600, 300);
     plotter = new Plotter();
     plotter.mode = 0;
     background((params.invertedColor ? "black" : "white"));
@@ -296,6 +313,7 @@ function windowResized() {
 function mousePressed() {
     if (counter == -1) {
         clear();
+        imgDOM.hide();
         background((params.invertedColor ? "black" : "white"));
         counter++;
     }

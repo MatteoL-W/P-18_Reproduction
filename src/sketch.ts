@@ -50,6 +50,7 @@ let current;
 let plotter;
 let counter = -1;
 let rectangle;
+let time;
 
 let configuration;
 let configurationOblique;
@@ -157,6 +158,7 @@ class Plotter {
 
 function draw() {
     if (counter == -1) {
+        time = millis();
         drawMenu();
         return;
     }
@@ -333,21 +335,35 @@ function drawMenu() {
     pop()
 
     push()
+    let time = millis();
+    console.log(time)
+    //rotateX(time / 1000);
+    //rotateZ(time / 1234);
+    rotate(frameCount)
     fill("pink")
     textAlign(CENTER)
-    textSize(50)
+    textSize(30)
     textFont(fontMenuBold)
-    rotate(frameCount / 1000, [90]);
-    //rotateZ(frameCount / 1234);
-    //translate(0,-250,0)
-    text("Start", width / 2, 250)
+    text("Rom1",150,150)
     pop()
 
     push()
+    fill("blue")
+    translate(width,height)
     rotate(frameCount);
+    textAlign(CENTER)
+    textSize(30)
+    textFont(fontMenuBold)
+    text("Mattéo",(width/2)-300,(height/2)-300)
+    pop()
+
+    push()
+    fill("grey")
+    translate(width/2,height/2+100)
+    textAlign(CENTER)
     textSize(30)
     textFont(fontMenuLight)
-    text("Bougez la souris lentement !", width / 2, 800)
+    text("Cliquez pour commencer\nPuis bougez la souris lentement...",0,0)
     pop()
 }
 
@@ -355,7 +371,7 @@ function drawMenu() {
 //    Initialization
 // -------------------
 function preload() {
-    gif_loadImg = "https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g"
+    gif_loadImg = "https://media2.giphy.com/media/3WHGMKF9ngxihOR1Hj/giphy.gif?cid=790b7611f0f0a5fabd7a128e44bd0c295331c35c96234770&rid=giphy.gif&ct=g"
     fontMenuBold = loadFont("./font/Noto_Sans_JP/NotoSansJP-Black.otf");
     fontMenuLight = loadFont("./font/Noto_Sans_JP/NotoSansJP-Thin.otf");
 }
@@ -364,8 +380,8 @@ function setup() {
     p6_CreateCanvas();
     imageMode(CENTER)
     //mettre gif "start" en plotter
-    //imgDOM = createImg(gif_loadImg, 'test');
-    //imgDOM.position(width / 2, height / 2)
+    imgDOM = createImg(gif_loadImg, 'test');
+    imgDOM.position(600, 300)
 
     plotter = new Plotter();
     plotter.mode = 0;
@@ -387,7 +403,7 @@ function mousePressed() {
     if (counter == -1) {
         clear();
         // et enlever le commentaire
-        //imgDOM.hide();
+        imgDOM.hide();
         background((params.invertedColor ? "black" : "white"))
         counter++;
     }
