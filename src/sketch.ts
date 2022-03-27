@@ -363,8 +363,9 @@ function preload() {
 function setup() {
     p6_CreateCanvas();
     imageMode(CENTER)
-    imgDOM = createImg(gif_loadImg, 'test');
-    imgDOM.position(width / 2, height / 2)
+    //mettre gif "start" en plotter
+    //imgDOM = createImg(gif_loadImg, 'test');
+    //imgDOM.position(width / 2, height / 2)
 
     plotter = new Plotter();
     plotter.mode = 0;
@@ -385,7 +386,8 @@ function windowResized() {
 function mousePressed() {
     if (counter == -1) {
         clear();
-        imgDOM.hide();
+        // et enlever le commentaire
+        //imgDOM.hide();
         background((params.invertedColor ? "black" : "white"))
         counter++;
     }
