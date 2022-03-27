@@ -299,7 +299,7 @@ function setup() {
     p6_CreateCanvas();
     imageMode(CENTER);
     imgDOM = createImg(gif_loadImg, 'test');
-    imgDOM.position(600, 300);
+    imgDOM.position(760, 300);
     plotter = new Plotter();
     plotter.mode = 0;
     background((params.invertedColor ? "black" : "white"));

@@ -381,7 +381,7 @@ function setup() {
     imageMode(CENTER)
     //mettre gif "start" en plotter
     imgDOM = createImg(gif_loadImg, 'test');
-    imgDOM.position(600, 300)
+    imgDOM.position(760, 300)
 
     plotter = new Plotter();
     plotter.mode = 0;
