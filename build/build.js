@@ -1,128 +1,311 @@
 var gui = new dat.GUI();
 var params = {
-    Seed: 1,
+    Repetition_probability: 0.5,
+    Lines_nb: 100,
+    Arrangement: 20,
+    Max_norm: 200,
+    Padding: 80,
+    Mouse_radius: 400,
+    opacityPlays: true,
+    drawVisualizer: false,
+    invertedColor: false,
     Download_Image: function () { return save(); },
+    Add_line: function () { return params.Lines_nb++; },
+    Decrease_opacity: function () {
+        params.opacityPlays = !params.opacityPlays;
+    },
+    Toggle_visualizer: function () {
+        params.drawVisualizer = !params.drawVisualizer;
+    },
+    Inverse_color: function () {
+        params.invertedColor = !params.invertedColor;
+        background(params.invertedColor ? "black" : "white");
+    },
 };
-gui.add(params, "Seed", 1, 50, 1);
+gui.add(params, "Repetition_probability", 0, 1, 0.05);
+gui.add(params, "Lines_nb", 0, 200, 1);
+gui.add(params, "Arrangement", 1, 30, 1);
+gui.add(params, "Max_norm", 10, 250, 10);
+gui.add(params, "Padding", 0, 200, 10);
+gui.add(params, "Mouse_radius", 200, 600, 10);
 gui.add(params, "Download_Image");
-var PADDING = 10;
-var LINES_NB = 100;
-var MAX_NORM = 200;
+gui.add(params, "Add_line");
+gui.add(params, "Decrease_opacity");
+gui.add(params, "Toggle_visualizer");
+gui.add(params, "Inverse_color");
+var imgDOM;
+var gif_loadImg;
+var fontMenuBold;
+var fontMenuLight;
 var current;
-function checkConfiguration(xNewVector, yNewVector, configuration) {
+var plotter;
+var counter = -1;
+var rectangle;
+var configuration;
+var configurationOblique;
+var repetition = false;
+var randomNorm;
+var operatorRandom;
+var configurationRepetition;
+var operatorX;
+var operatorY;
+var randomLengthOpposite;
+var repetitionNumber;
+var repetitionCounter;
+var rectConstrain = (function () {
+    function rectConstrain() {
+        this.x = mouseX;
+        this.y = mouseY;
+        this.rayon = 400;
+    }
+    rectConstrain.prototype.render = function () {
+        this.rayon = params.Mouse_radius;
+        if (params.drawVisualizer) {
+            push();
+            stroke(128, 0, 0, 10);
+            strokeWeight(10);
+            noFill();
+            circle(this.x, this.y, this.rayon);
+            pop();
+        }
+    };
+    rectConstrain.prototype.step = function () {
+        this.x = mouseX;
+        this.y = mouseY;
+    };
+    return rectConstrain;
+}());
+var Plotter = (function () {
+    function Plotter() {
+        this.x = 0;
+        this.y = 0;
+        this.deltaX = 0;
+        this.deltaY = 0;
+        this.mode = 0;
+    }
+    Plotter.prototype.render = function () {
+        switch (this.mode) {
+            case 0:
+                point(this.x, this.y);
+                break;
+            case 1:
+                line(this.x, this.y + 5, this.x, this.y - 5);
+                break;
+            case 2:
+                line(this.x - 5, this.y, this.x + 5, this.y);
+                break;
+            case 3:
+                line(this.x, this.y, this.x + 10, this.y);
+                break;
+        }
+    };
+    Plotter.prototype.step = function (newVector) {
+        push();
+        fill((params.invertedColor ? "white" : "black"));
+        stroke((params.invertedColor ? "white" : "black"));
+        var distance = newVector.mag();
+        distance = (configuration === 'oblique') ? distance / sqrt(2) : distance;
+        for (var i = 0; i < distance * 2; i++) {
+            this.x += this.deltaX / 2;
+            this.y += this.deltaY / 2;
+            this.x = constrain(this.x, params.Padding, width - params.Padding);
+            this.y = constrain(this.y, params.Padding, height - params.Padding);
+            this.render();
+        }
+        this.x += this.deltaX / 2;
+        this.y += this.deltaY / 2;
+        pop();
+    };
+    return Plotter;
+}());
+function draw() {
+    if (counter == -1) {
+        drawMenu();
+        return;
+    }
+    var canDraw = (counter >= 0 && counter < params.Lines_nb);
+    if (canDraw) {
+        var xNewVector = void 0, yNewVector = void 0;
+        rectangle.step();
+        rectangle.render();
+        if (params.opacityPlays) {
+            easeBackground();
+        }
+        if (repetitionCounter < repetitionNumber) {
+            var configTemp = configuration;
+            switch (configurationRepetition) {
+                case 'horizontal':
+                    switch (configuration) {
+                        case 'horizontal':
+                            plotter.mode = 2;
+                            xNewVector = 0;
+                            yNewVector = operatorRandom * randomLengthOpposite;
+                            configuration = 'vertical';
+                            break;
+                        case 'vertical':
+                            current.y--;
+                            plotter.mode = 0;
+                            operatorX *= -1;
+                            xNewVector = operatorX * randomNorm;
+                            yNewVector = 0;
+                            configuration = 'horizontal';
+                            break;
+                    }
+                    break;
+                case 'vertical':
+                    switch (configuration) {
+                        case 'vertical':
+                            plotter.mode = 1;
+                            xNewVector = operatorRandom * randomLengthOpposite;
+                            yNewVector = 0;
+                            configuration = 'horizontal';
+                            break;
+                        case 'horizontal':
+                            plotter.mode = 0;
+                            operatorY *= -1;
+                            xNewVector = 0;
+                            yNewVector = operatorY * randomNorm;
+                            configuration = 'vertical';
+                            break;
+                    }
+                    break;
+                case 'oblique':
+                    xNewVector = (configurationOblique === 'x') ? -randomNorm * plotter.deltaX : randomNorm * plotter.deltaX;
+                    yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY;
+                    break;
+            }
+            if (outOfRectangle(xNewVector, yNewVector) === true) {
+                configuration = configTemp;
+                repetition = false;
+                repetitionNumber = 0;
+                return;
+            }
+            repetitionCounter++;
+            drawLines(createVector(xNewVector, yNewVector));
+            counter++;
+        }
+        else {
+            repetition = false;
+            repetitionCounter = 0;
+            var configurationTemp = whatConfiguration(xNewVector, yNewVector);
+            randomNorm = params.Arrangement * floor(random(0, params.Max_norm) / params.Arrangement);
+            plotter.rotateMode = random([1, 0, 0, 0]);
+            xNewVector = random([-1 * randomNorm, 0, randomNorm]);
+            yNewVector = random([-1 * randomNorm, 0, randomNorm]);
+            if (outOfRectangle(xNewVector, yNewVector) === true
+                || (xNewVector === yNewVector && yNewVector === 0)
+                || (configurationTemp === whatConfiguration(xNewVector, yNewVector))
+                || (whatConfiguration(xNewVector, yNewVector) == undefined)) {
+                return;
+            }
+            configuration = whatConfiguration(xNewVector, yNewVector);
+            configurationRepetition = configuration;
+            drawLines(createVector(xNewVector, yNewVector));
+            counter++;
+            operatorX = plotter.deltaX;
+            operatorY = plotter.deltaY;
+            operatorRandom = random([-1, 1]);
+            randomLengthOpposite = params.Arrangement * floor(random(10, (params.Max_norm)) / params.Arrangement);
+            if (random(1) < params.Repetition_probability) {
+                repetition = true;
+                repetitionNumber = random([4, 5, 6, 7]);
+                if (configurationRepetition == 'oblique') {
+                    plotter.mode = random([0, 0, 0, 3]);
+                }
+            }
+        }
+    }
+}
+function easeBackground() {
+    push();
+    noStroke();
+    var color = (params.invertedColor ? [0, 0, 0, 3] : [255, 255, 255, 3]);
+    fill(color);
+    rect(0, 0, width, height);
+    pop();
+}
+function drawLines(newVector) {
+    plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x)) / newVector.x;
+    plotter.deltaY = (newVector.y === 0) ? 0 : (abs(newVector.y)) / newVector.y;
+    plotter.x = current.x;
+    plotter.y = current.y;
+    plotter.step(newVector);
+    current.add(newVector);
+}
+function outOfRectangle(xNewVector, yNewVector) {
+    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
+    if (futureVectorCopy.x < rectangle.x - (rectangle.rayon / 3) || futureVectorCopy.x > rectangle.x + (rectangle.rayon / 3)) {
+        return true;
+    }
+    if (futureVectorCopy.y < rectangle.y - (rectangle.rayon / 3) || futureVectorCopy.y > rectangle.y + (rectangle.rayon / 3)) {
+        return true;
+    }
+    return false;
+}
+function whatConfiguration(xNewVector, yNewVector) {
     if (abs(xNewVector) === abs(yNewVector) && xNewVector != 0) {
-        configuration = 'oblique';
+        return 'oblique';
     }
     else if (xNewVector === 0 && yNewVector != 0) {
-        configuration = 'vertical';
+        return 'vertical';
     }
     else if (yNewVector === 0 && xNewVector != 0) {
-        configuration = 'horizontal';
+        return 'horizontal';
     }
     return configuration;
 }
-function draw() {
-    randomSeed(params.Seed);
-    background("white");
-    var configuration;
-    var repetition = false;
-    var repetitionProbability = 1;
-    var iterationRepetition = 0;
-    var randomNorm;
-    current = createVector(random(PADDING, width - PADDING), random(PADDING, height - PADDING));
-    for (var i = 0; i < LINES_NB; i++) {
-        var xNewVector = void 0, yNewVector = void 0;
-        var randomRun = random(0, 1);
-        if (repetition && randomRun < repetitionProbability) {
-            var operator = ((iterationRepetition / 2) % 2 == 0) ? 1 : -1;
-            if (configuration === 'horizontal') {
-                xNewVector = 0;
-                yNewVector = operator * randomNorm;
-                configuration = 'vertical';
-            }
-            else if (configuration === 'vertical') {
-                xNewVector = -operator * randomNorm;
-                yNewVector = 0;
-                configuration = 'horizontal';
-            }
-            else if (configuration === 'oblique') {
-                operator = (iterationRepetition % 2 == 0) ? 1 : -1;
-                xNewVector = operator * randomNorm;
-                yNewVector = randomNorm;
-            }
-            repetitionProbability -= .2;
-            iterationRepetition++;
-            var inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
-            drawLines(createVector(inGridVector.xNewVector, inGridVector.yNewVector));
-        }
-        else {
-            randomNorm = 20 * floor(random(0, MAX_NORM) / 20);
-            repetition = false;
-            var xRandom = floor(random(0, 3));
-            var yRandom = floor(random(0, 3));
-            switch (xRandom) {
-                case 0:
-                    xNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    xNewVector = 0;
-                    break;
-                case 2:
-                    xNewVector = randomNorm;
-                    break;
-            }
-            switch (yRandom) {
-                case 0:
-                    yNewVector = -1 * randomNorm;
-                    break;
-                case 1:
-                    yNewVector = 0;
-                    break;
-                case 2:
-                    yNewVector = randomNorm;
-                    break;
-            }
-            var inGridVector = avoidOutOfGrid(xNewVector, yNewVector);
-            xNewVector = inGridVector.xNewVector;
-            yNewVector = inGridVector.yNewVector;
-            configuration = checkConfiguration(xNewVector, yNewVector, configuration);
-            if (xNewVector === yNewVector && yNewVector === 0) {
-                i--;
-            }
-            if (randomRun < 0.3) {
-                repetition = true;
-                repetitionProbability = 1;
-                iterationRepetition = 0;
-            }
-            drawLines(createVector(xNewVector, yNewVector));
-        }
-    }
+function drawMenu() {
+    push();
+    stroke((params.invertedColor ? "black" : "white"));
+    strokeWeight(2);
+    imageMode(CENTER);
+    pop();
+    push();
+    fill("pink");
+    textAlign(CENTER);
+    textSize(50);
+    textFont(fontMenuBold);
+    rotate(frameCount / 1000, [90]);
+    text("Start", width / 2, 250);
+    pop();
+    push();
+    rotate(frameCount);
+    textSize(30);
+    textFont(fontMenuLight);
+    text("Bougez la souris lentement !", width / 2, 800);
+    pop();
 }
-function drawLines(newVector) {
-    line(current.x, current.y, current.x + newVector.x, current.y + newVector.y);
-    current.add(newVector);
-}
-function avoidOutOfGrid(xNewVector, yNewVector) {
-    var futureVectorCopy = current.copy().add(createVector(xNewVector, yNewVector));
-    if (futureVectorCopy.x < PADDING) {
-        xNewVector = abs(xNewVector);
-    }
-    else if (futureVectorCopy.x > width - PADDING) {
-        xNewVector = -xNewVector;
-    }
-    if (futureVectorCopy.y < PADDING) {
-        yNewVector = abs(yNewVector);
-    }
-    else if (futureVectorCopy.y > height - PADDING) {
-        yNewVector = -yNewVector;
-    }
-    return { xNewVector: xNewVector, yNewVector: yNewVector };
+function preload() {
+    gif_loadImg = "https://media1.giphy.com/media/Fu3OjBQiCs3s0ZuLY3/giphy.webp?cid=ecf05e47mns5zyc04ipb95h0lwr7vwny85ot5oita864tm7l&rid=giphy.webp&ct=g";
+    fontMenuBold = loadFont("./font/Noto_Sans_JP/NotoSansJP-Black.otf");
+    fontMenuLight = loadFont("./font/Noto_Sans_JP/NotoSansJP-Thin.otf");
 }
 function setup() {
     p6_CreateCanvas();
+    imageMode(CENTER);
+    imgDOM = createImg(gif_loadImg, 'test');
+    imgDOM.position(width / 2, height / 2);
+    plotter = new Plotter();
+    plotter.mode = 0;
+    background((params.invertedColor ? "black" : "white"));
+    frameRate(24);
+    rectangle = new rectConstrain;
+    current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
 }
 function windowResized() {
     p6_ResizeCanvas();
+}
+function mousePressed() {
+    if (counter == -1) {
+        clear();
+        imgDOM.hide();
+        background((params.invertedColor ? "black" : "white"));
+        counter++;
+    }
+}
+function animationMenu() {
+    current.x = width / 2 - 200;
+    current.y = height / 2 + 100;
 }
 var __ASPECT_RATIO = 1;
 var __MARGIN_SIZE = 25;
