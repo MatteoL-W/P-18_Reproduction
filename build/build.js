@@ -6,14 +6,20 @@ var params = {
     Arrangement: 20,
     Max_norm: 200,
     Padding: 80,
+    invertedColor: true,
     Download_Image: function () { return save(); },
+    Add_line: function () { return params.Lines_nb++; },
+    Inverse_color: function () {
+        params.invertedColor = !params.invertedColor;
+    },
 };
 gui.add(params, "Seed", 0, 100, 1).onChange(function () { return draw(); });
-gui.add(params, "Repetition_probability", 0, 1, 0.05);
-gui.add(params, "Lines_nb", 0, 200, 1);
-gui.add(params, "Arrangement", 1, 30, 1);
-gui.add(params, "Max_norm", 10, 250, 10);
-gui.add(params, "Padding", 0, 200, 10);
+gui.add(params, "Repetition_probability", 0, 1, 0.05).onChange(function () { return draw(); });
+gui.add(params, "Lines_nb", 0, 200, 1).onChange(function () { return draw(); });
+gui.add(params, "Arrangement", 1, 30, 1).onChange(function () { return draw(); });
+gui.add(params, "Max_norm", 10, 250, 10).onChange(function () { return draw(); });
+gui.add(params, "Padding", 0, 200, 10).onChange(function () { return draw(); });
+gui.add(params, "Inverse_color").onChange(function () { return draw(); });
 var current;
 var plotter;
 var rectangle;
@@ -54,8 +60,8 @@ var Plotter = (function () {
     };
     Plotter.prototype.step = function (newVector) {
         push();
-        fill("white");
-        stroke("white");
+        fill((params.invertedColor ? "white" : "black"));
+        stroke((params.invertedColor ? "white" : "black"));
         var distance = newVector.mag();
         distance = (configuration === 'oblique') ? distance / sqrt(2) : distance;
         for (var i = 0; i < distance * 2; i++) {
@@ -76,7 +82,7 @@ function draw() {
     plotter.mode = 0;
     randomSeed(params.Seed);
     current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
-    background("black");
+    background((params.invertedColor ? "black" : "white"));
     var counter = 0;
     while (counter < params.Lines_nb) {
         var xNewVector = void 0, yNewVector = void 0;

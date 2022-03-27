@@ -10,14 +10,20 @@ const params = {
     Arrangement: 20,
     Max_norm: 200,
     Padding: 80,
+    invertedColor: true,
     Download_Image: () => save(),
+    Add_line: () => params.Lines_nb++,
+    Inverse_color: () => {
+        params.invertedColor = !params.invertedColor
+    },
 }
 gui.add(params, "Seed", 0, 100, 1).onChange(() => draw())
-gui.add(params, "Repetition_probability", 0, 1, 0.05)
-gui.add(params, "Lines_nb", 0, 200, 1)
-gui.add(params, "Arrangement", 1, 30, 1)
-gui.add(params, "Max_norm", 10, 250, 10)
-gui.add(params, "Padding", 0, 200, 10)
+gui.add(params, "Repetition_probability", 0, 1, 0.05).onChange(() => draw())
+gui.add(params, "Lines_nb", 0, 200, 1).onChange(() => draw())
+gui.add(params, "Arrangement", 1, 30, 1).onChange(() => draw())
+gui.add(params, "Max_norm", 10, 250, 10).onChange(() => draw())
+gui.add(params, "Padding", 0, 200, 10).onChange(() => draw())
+gui.add(params, "Inverse_color").onChange(() => draw())
 
 // -------------------
 //     Variables
@@ -77,8 +83,8 @@ class Plotter {
 
     step(newVector) {
         push()
-        fill("white")
-        stroke("white")
+        fill((params.invertedColor ? "white" : "black"))
+        stroke((params.invertedColor ? "white" : "black"))
 
         let distance = newVector.mag();
         distance = (configuration === 'oblique') ? distance / sqrt(2) : distance;
@@ -112,7 +118,7 @@ function draw() {
         random(params.Padding, height - params.Padding)
     )
 
-    background("black")
+    background((params.invertedColor ? "black" : "white"))
 
     let counter = 0
     while (counter < params.Lines_nb) {
