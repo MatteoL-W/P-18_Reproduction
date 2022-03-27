@@ -23,6 +23,7 @@ const params = {
     },
     Inverse_color: () => {
         params.invertedColor = !params.invertedColor
+        background(params.invertedColor ? "black" : "white" )
     },
 }
 gui.add(params, "Repetition_probability", 0, 1, 0.05)
@@ -282,7 +283,7 @@ function draw() {
 function easeBackground() {
     push()
     noStroke()
-    let color = (params.invertedColor ? [0, 0, 0, 3] : [255, 255, 255, 3] )
+    let color = (params.invertedColor ? [0, 0, 0, 3] : [255, 255, 255, 3])
     fill(color)
     rect(0, 0, width, height)
     pop()
@@ -325,7 +326,7 @@ function whatConfiguration(xNewVector, yNewVector) { //return the actual configu
 
 function drawMenu() {
     push()
-    stroke((params.invertedColor ? "black" : "white" ))
+    stroke((params.invertedColor ? "black" : "white"))
     strokeWeight(2)
     //rect(width/2-300,height/2-150,600,300)
     imageMode(CENTER)
@@ -363,11 +364,11 @@ function setup() {
     p6_CreateCanvas();
     imageMode(CENTER)
     imgDOM = createImg(gif_loadImg, 'test');
-    imgDOM.position(width/2, height/2)
+    imgDOM.position(width / 2, height / 2)
 
     plotter = new Plotter();
     plotter.mode = 0;
-    background("white")
+    background((params.invertedColor ? "black" : "white"))
     frameRate(24)
     rectangle = new rectConstrain;
 
@@ -385,7 +386,7 @@ function mousePressed() {
     if (counter == -1) {
         clear();
         imgDOM.hide();
-        background((params.invertedColor ? "black" : "white" ))
+        background((params.invertedColor ? "black" : "white"))
         counter++;
     }
 }

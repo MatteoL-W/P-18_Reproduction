@@ -19,6 +19,7 @@ var params = {
     },
     Inverse_color: function () {
         params.invertedColor = !params.invertedColor;
+        background(params.invertedColor ? "black" : "white");
     },
 };
 gui.add(params, "Repetition_probability", 0, 1, 0.05);
@@ -286,7 +287,7 @@ function setup() {
     imgDOM.position(width / 2, height / 2);
     plotter = new Plotter();
     plotter.mode = 0;
-    background("white");
+    background((params.invertedColor ? "black" : "white"));
     frameRate(24);
     rectangle = new rectConstrain;
     current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
