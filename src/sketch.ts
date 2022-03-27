@@ -12,7 +12,7 @@ const params = {
     Padding: 80,
     Download_Image: () => save(),
 }
-gui.add(params, "Seed", 0, 100, 1)
+gui.add(params, "Seed", 0, 100, 1).onChange(() => draw())
 gui.add(params, "Repetition_probability", 0, 1, 0.05)
 gui.add(params, "Lines_nb", 0, 200, 1)
 gui.add(params, "Arrangement", 1, 30, 1)
@@ -222,6 +222,7 @@ function draw() {
             }
         }
     }
+    noLoop();
 }
 
 function drawLines(newVector) {
