@@ -71,10 +71,6 @@ var Plotter = (function () {
 function draw() {
     var noCounter = false;
     if (counter < params.Lines_nb) {
-        push();
-        fill(255, 255, 255, 10);
-        rect(0, 0, width, height);
-        pop();
         var xNewVector = void 0, yNewVector = void 0;
         var randomRun = random(0, 1);
         if (repetitionCounter < repetitionNumber) {
@@ -174,12 +170,6 @@ function draw() {
                 }
                 else {
                     configuration = whatConfiguration(xNewVector, yNewVector);
-                    if (randomRun < 1) {
-                        repetition = true;
-                        repetitionProbability = 1;
-                        iterationRepetition = 0;
-                        configurationOblique = random(['x', 'y']);
-                    }
                     console.log("x : " + xNewVector);
                     console.log("y : " + yNewVector);
                     console.log("-----------");
@@ -191,8 +181,7 @@ function draw() {
                     console.log("opX :" + operatorX + "  opY :" + operatorY);
                     operatorRandom = random([-1, 1]);
                     randomLengthOpposite = params.Multipliers * floor(random(10, (params.Max_norm)) / params.Multipliers);
-                    var flip3 = random([0, 1, 2]);
-                    if (flip3 == 0) {
+                    if (random(0, 1) < 0.4) {
                         repetition = true;
                         repetitionNumber = random([4, 5, 6, 7]);
                         if (configurationRepetition == 'oblique') {
@@ -245,7 +234,7 @@ function setup() {
     plotter = new Plotter();
     plotter.mode = 0;
     background("white");
-    frameRate(5);
+    frameRate(10);
     current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
 }
 function windowResized() {
