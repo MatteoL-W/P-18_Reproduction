@@ -330,15 +330,10 @@ function drawMenu() {
     push()
     stroke((params.invertedColor ? "black" : "white"))
     strokeWeight(2)
-    //rect(width/2-300,height/2-150,600,300)
     imageMode(CENTER)
     pop()
 
     push()
-    let time = millis();
-    console.log(time)
-    //rotateX(time / 1000);
-    //rotateZ(time / 1234);
     rotate(frameCount)
     fill("pink")
     textAlign(CENTER)
