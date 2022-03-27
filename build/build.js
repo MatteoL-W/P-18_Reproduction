@@ -1,7 +1,7 @@
 var gui = new dat.GUI();
 var params = {
     Seed: 1,
-    Lines_nb: 5,
+    Lines_nb: 100,
     Multipliers: 20,
     Max_norm: 200,
     Padding: 80,
@@ -144,7 +144,7 @@ function draw() {
                 }
                 else {
                     configuration = whatConfiguration(xNewVector, yNewVector);
-                    if (randomRun < 1) {
+                    if (randomRun < 0.5) {
                         repetition = true;
                         repetitionProbability = 1;
                         iterationRepetition = 0;
