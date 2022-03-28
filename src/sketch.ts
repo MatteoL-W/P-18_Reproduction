@@ -4,7 +4,6 @@
 
 const gui = new dat.GUI()
 const params = {
-    Seed: 1,
     Lines_nb: 100,
     Multipliers: 20,
     Max_norm: 200,
@@ -12,7 +11,6 @@ const params = {
     Download_Image: () => save(),
     Ajouter_Ligne:() => params.Lines_nb++,
 }
-gui.add(params, "Seed", 1, 50, 1)
 gui.add(params, "Lines_nb", 0, 200, 1)
 gui.add(params, "Multipliers", 1, 30, 1)
 gui.add(params, "Max_norm", 10, 250, 10)
@@ -48,16 +46,31 @@ class Plotter {
     y: number;
     deltaX: number;
     deltaY: number;
+    mode: number;
 
     constructor() {
         this.x = 0;
         this.y = 0;
         this.deltaX = 0;
         this.deltaY = 0;
+        this.mode = 0;
     }
 
     render() {
-        line(this.x, this.y + 5, this.x, this.y - 5);
+        switch (this.mode) {
+            case 0 : //default -> point
+                point(this.x, this.y)
+                break;
+            case 1 : //1 -> vertical line
+                line(this.x, this.y + 5, this.x, this.y - 5);
+                break;
+            case 2 : //2 -> horizontal line
+                line(this.x - 5, this.y, this.x + 5, this.y);
+                break;
+            case 3 : //2 -> horizontal line for oblique
+                line(this.x, this.y, this.x + 10, this.y);
+                break;
+        }
     }
 
     step(newVector) {
@@ -94,6 +107,7 @@ function draw() {
                     switch (configuration)
                     {
                         case 'horizontal':
+                            plotter.mode = 2;
                             xNewVector = 0;
                             console.log("!!! : "+operatorRandom)
                             console.log("randomLengthOpposite : "+randomLengthOpposite)
@@ -101,6 +115,8 @@ function draw() {
                             configuration = 'vertical';
                             break;
                         case 'vertical':
+                            current.y--;
+                            plotter.mode = 0;
                             operatorX *= -1;
                             xNewVector = operatorX * randomNorm;
                             yNewVector = 0;
@@ -113,6 +129,7 @@ function draw() {
                     switch (configuration)
                     {
                         case 'vertical':
+                            plotter.mode = 1;
                             xNewVector = operatorRandom * randomLengthOpposite;
                             console.log("!!! : "+operatorRandom)
                             console.log("randomLengthOpposite : "+randomLengthOpposite)
@@ -120,6 +137,7 @@ function draw() {
                             configuration = 'horizontal'
                             break;   
                         case 'horizontal':
+                            plotter.mode = 0;
                             operatorY *= -1;
                             xNewVector = 0;
                             yNewVector = operatorY * randomNorm;
@@ -169,6 +187,7 @@ function draw() {
             randomNorm = params.Multipliers * floor(random(0, params.Max_norm) / params.Multipliers);
             repetition = false;
 
+            plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
 
@@ -203,7 +222,10 @@ function draw() {
                         repetition = true;
                         repetitionProbability = 1;
                         iterationRepetition = 0;
-                        configurationOblique = random(['x', 'y'])
+                        if (configuration === 'oblique') {
+                            configurationOblique = random(['x', 'y'])
+                            plotter.mode = random([0, 0, 0, 3])
+                        }
                     }
 
                     console.log("x : "  + xNewVector)
