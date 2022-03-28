@@ -248,7 +248,7 @@ function whatConfiguration(xNewVector, yNewVector) { //return the actual configu
 // -------------------
 
 function setup() {
-    //alert("This is a production trial of P-18 in instant reproduction: it works but is not the best result we have. Thank you :)")
+    alert("This is a production trial of P-18 in instant reproduction: it works but is not the best result we have. Thank you :)")
 
     p6_CreateCanvas()
 }
