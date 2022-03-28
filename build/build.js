@@ -40,9 +40,23 @@ var Plotter = (function () {
         this.y = 0;
         this.deltaX = 0;
         this.deltaY = 0;
+        this.mode = 0;
     }
     Plotter.prototype.render = function () {
-        line(this.x, this.y + 5, this.x, this.y - 5);
+        switch (this.mode) {
+            case 0:
+                point(this.x, this.y);
+                break;
+            case 1:
+                line(this.x, this.y + 5, this.x, this.y - 5);
+                break;
+            case 2:
+                line(this.x - 5, this.y, this.x + 5, this.y);
+                break;
+            case 3:
+                line(this.x, this.y, this.x + 10, this.y);
+                break;
+        }
     };
     Plotter.prototype.step = function (newVector) {
         push();
@@ -77,12 +91,14 @@ function draw() {
                 case 'horizontal':
                     switch (configuration) {
                         case 'horizontal':
+                            plotter.mode = 2;
                             xNewVector = 0;
                             yNewVector = operatorRandom * randomLengthOpposite;
                             configuration = 'vertical';
                             break;
                         case 'vertical':
                             current.y--;
+                            plotter.mode = 0;
                             operatorX *= -1;
                             xNewVector = operatorX * randomNorm;
                             yNewVector = 0;
@@ -93,11 +109,13 @@ function draw() {
                 case 'vertical':
                     switch (configuration) {
                         case 'vertical':
+                            plotter.mode = 1;
                             xNewVector = operatorRandom * randomLengthOpposite;
                             yNewVector = 0;
                             configuration = 'horizontal';
                             break;
                         case 'horizontal':
+                            plotter.mode = 0;
                             operatorY *= -1;
                             xNewVector = 0;
                             yNewVector = operatorY * randomNorm;
@@ -125,6 +143,7 @@ function draw() {
             repetitionCounter = 0;
             var configurationTemp = whatConfiguration(xNewVector, yNewVector);
             randomNorm = params.Arrangement * floor(random(0, params.Max_norm) / params.Arrangement);
+            plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
             if (outOfRectangle(xNewVector, yNewVector) === true
@@ -146,6 +165,7 @@ function draw() {
                 repetitionNumber = random([4, 5, 6, 7]);
                 if (configuration === 'oblique') {
                     configurationOblique = random(['x', 'y']);
+                    plotter.mode = random([0, 0, 0, 3]);
                 }
             }
         }
