@@ -212,6 +212,7 @@ function draw() {
                 repetition = true;
                 repetitionNumber = random([4, 5, 6, 7]);
                 if (configurationRepetition == 'oblique') {
+                    configurationOblique = random(['x', 'y']);
                     plotter.mode = random([0, 0, 0, 3]);
                 }
             }
@@ -263,8 +264,6 @@ function drawMenu() {
     imageMode(CENTER);
     pop();
     push();
-    var time = millis();
-    console.log(time);
     rotate(frameCount);
     fill("pink");
     textAlign(CENTER);
