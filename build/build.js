@@ -5,7 +5,7 @@ var params = {
     Lines_nb: 100,
     Arrangement: 20,
     Max_norm: 200,
-    Padding: 10,
+    Padding: 0,
     invertedColor: true,
     Download_Image: function () { return save(); },
     Add_line: function () { return params.Lines_nb++; },
@@ -53,6 +53,8 @@ var Plotter = (function () {
         for (var i = 0; i < distance * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
+            this.x = constrain(this.x, params.Padding, width - params.Padding);
+            this.y = constrain(this.y, params.Padding, height - params.Padding);
             this.render();
         }
         this.x += this.deltaX / 2;

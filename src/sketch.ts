@@ -9,7 +9,7 @@ const params = {
     Lines_nb: 100,
     Arrangement: 20,
     Max_norm: 200,
-    Padding: 10,
+    Padding: 0,
     invertedColor: true,
     Download_Image: () => save(),
     Add_line: () => params.Lines_nb++,
@@ -78,8 +78,8 @@ class Plotter {
         for (let i = 0; i < distance * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
-            //this.x = constrain(this.x, params.Padding, width - params.Padding);
-            //this.y = constrain(this.y, params.Padding, height - params.Padding);
+            this.x = constrain(this.x, params.Padding, width - params.Padding);
+            this.y = constrain(this.y, params.Padding, height - params.Padding);
 
             this.render();
         }
