@@ -5,7 +5,7 @@ var params = {
     Lines_nb: 100,
     Arrangement: 20,
     Max_norm: 200,
-    Padding: 80,
+    Padding: 10,
     invertedColor: true,
     Download_Image: function () { return save(); },
     Add_line: function () { return params.Lines_nb++; },
@@ -40,23 +40,9 @@ var Plotter = (function () {
         this.y = 0;
         this.deltaX = 0;
         this.deltaY = 0;
-        this.mode = 0;
     }
     Plotter.prototype.render = function () {
-        switch (this.mode) {
-            case 0:
-                point(this.x, this.y);
-                break;
-            case 1:
-                line(this.x, this.y + 5, this.x, this.y - 5);
-                break;
-            case 2:
-                line(this.x - 5, this.y, this.x + 5, this.y);
-                break;
-            case 3:
-                line(this.x, this.y, this.x + 10, this.y);
-                break;
-        }
+        line(this.x, this.y + 5, this.x, this.y - 5);
     };
     Plotter.prototype.step = function (newVector) {
         push();
@@ -67,8 +53,6 @@ var Plotter = (function () {
         for (var i = 0; i < distance * 2; i++) {
             this.x += this.deltaX / 2;
             this.y += this.deltaY / 2;
-            this.x = constrain(this.x, params.Padding, width - params.Padding);
-            this.y = constrain(this.y, params.Padding, height - params.Padding);
             this.render();
         }
         this.x += this.deltaX / 2;
@@ -79,7 +63,6 @@ var Plotter = (function () {
 }());
 function draw() {
     plotter = new Plotter();
-    plotter.mode = 0;
     randomSeed(params.Seed);
     current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
     background((params.invertedColor ? "black" : "white"));
@@ -92,14 +75,12 @@ function draw() {
                 case 'horizontal':
                     switch (configuration) {
                         case 'horizontal':
-                            plotter.mode = 2;
                             xNewVector = 0;
                             yNewVector = operatorRandom * randomLengthOpposite;
                             configuration = 'vertical';
                             break;
                         case 'vertical':
                             current.y--;
-                            plotter.mode = 0;
                             operatorX *= -1;
                             xNewVector = operatorX * randomNorm;
                             yNewVector = 0;
@@ -110,13 +91,11 @@ function draw() {
                 case 'vertical':
                     switch (configuration) {
                         case 'vertical':
-                            plotter.mode = 1;
                             xNewVector = operatorRandom * randomLengthOpposite;
                             yNewVector = 0;
                             configuration = 'horizontal';
                             break;
                         case 'horizontal':
-                            plotter.mode = 0;
                             operatorY *= -1;
                             xNewVector = 0;
                             yNewVector = operatorY * randomNorm;
@@ -144,7 +123,6 @@ function draw() {
             repetitionCounter = 0;
             var configurationTemp = whatConfiguration(xNewVector, yNewVector);
             randomNorm = params.Arrangement * floor(random(0, params.Max_norm) / params.Arrangement);
-            plotter.rotateMode = random([1, 0, 0, 0]);
             xNewVector = random([-1 * randomNorm, 0, randomNorm]);
             yNewVector = random([-1 * randomNorm, 0, randomNorm]);
             if (outOfRectangle(xNewVector, yNewVector) === true
@@ -164,9 +142,6 @@ function draw() {
             if (random(1) < params.Repetition_probability) {
                 repetition = true;
                 repetitionNumber = random([4, 5, 6, 7]);
-                if (configurationRepetition == 'oblique') {
-                    plotter.mode = random([0, 0, 0, 3]);
-                }
             }
         }
     }
@@ -203,7 +178,6 @@ function whatConfiguration(xNewVector, yNewVector) {
     return configuration;
 }
 function setup() {
-    alert("This is a production trial of P-18 in instant reproduction: it works but is not the best result we have. Thank you :)");
     p6_CreateCanvas();
 }
 function windowResized() {
