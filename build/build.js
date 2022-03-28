@@ -110,7 +110,7 @@ function draw() {
                     yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY;
                     break;
             }
-            if (outOfRectangle(xNewVector, yNewVector) === true) {
+            if (outOfRectangle(xNewVector, yNewVector)) {
                 configuration = configTemp;
                 repetition = false;
                 repetitionNumber = 0;
@@ -144,6 +144,9 @@ function draw() {
             if (random(1) < params.Repetition_probability) {
                 repetition = true;
                 repetitionNumber = random([4, 5, 6, 7]);
+                if (configuration === 'oblique') {
+                    configurationOblique = random(['x', 'y']);
+                }
             }
         }
     }
@@ -180,7 +183,6 @@ function whatConfiguration(xNewVector, yNewVector) {
     return configuration;
 }
 function setup() {
-    alert("This is a production trial of P-18 in instant reproduction: it works but is not the best result we have. Thank you :)");
     p6_CreateCanvas();
 }
 function windowResized() {
