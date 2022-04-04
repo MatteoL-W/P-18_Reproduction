@@ -5,10 +5,10 @@
 const gui = new dat.GUI()
 const params = {
     Seed: 1,
-    Repetition_probability: 0.5,
-    Lines_nb: 100,
-    Arrangement: 20,
-    Max_norm: 200,
+    Repetition_probability: 1,
+    Lines_nb: 20,
+    Arrangement: 5,
+    Max_norm: 20,
     Padding: 0,
     invertedColor: true,
     Download_Image: () => save(),
@@ -24,6 +24,16 @@ gui.add(params, "Arrangement", 1, 30, 1).onChange(() => draw())
 gui.add(params, "Max_norm", 10, 250, 10).onChange(() => draw())
 gui.add(params, "Padding", 0, 200, 10).onChange(() => draw())
 gui.add(params, "Inverse_color").onChange(() => draw())
+
+const capturer = new CCapture({
+    framerate: 5,
+    format: "png",
+    name: "exportHorizontalLines",
+    quality: 100,
+    verbose: true,
+});
+
+let p5Canvas
 
 // -------------------
 //     Variables
@@ -59,8 +69,8 @@ class Plotter {
     constructor() {
         this.x = 0;
         this.y = 0;
-        this.deltaX = 0;
-        this.deltaY = 0;
+        this.deltaX = 1;
+        this.deltaY = 1;
         this.mode = 0;
     }
 
@@ -70,13 +80,13 @@ class Plotter {
                 point(this.x, this.y)
                 break;
             case 1 : //1 -> vertical line
-                line(this.x, this.y + 5, this.x, this.y - 5);
+                line(this.x, this.y + 1, this.x, this.y - 1);
                 break;
             case 2 : //2 -> horizontal line
-                line(this.x - 5, this.y, this.x + 5, this.y);
+                line(this.x - 1, this.y, this.x + 1, this.y);
                 break;
             case 3 : //2 -> horizontal line for oblique
-                line(this.x, this.y, this.x + 10, this.y);
+                line(this.x, this.y, this.x + 2, this.y);
                 break;
         }
     }
@@ -109,8 +119,10 @@ class Plotter {
 // -------------------
 
 function draw() {
+    if (frameCount === 1) capturer.start();
+
     plotter = new Plotter();
-    randomSeed(params.Seed)
+    //randomSeed(params.Seed)
 
     current = createVector(
         random(params.Padding, width - params.Padding),
@@ -165,6 +177,7 @@ function draw() {
                     break;
 
                 case 'oblique':
+                    randomNorm = (randomNorm === 0) ? random(0, params.Max_norm) : randomNorm;
                     xNewVector = (configurationOblique === 'x') ? -randomNorm * plotter.deltaX : randomNorm * plotter.deltaX
                     yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY
                     break;
@@ -220,7 +233,7 @@ function draw() {
 
             if (random(1) < params.Repetition_probability) {
                 repetition = true;
-                repetitionNumber = random([4, 5, 6, 7]);
+                repetitionNumber = random([2, 3, 4]);
                 if (configuration === 'oblique') {
                     configurationOblique = random(['x','y'])
                     plotter.mode = random([0, 0, 0, 3])
@@ -228,7 +241,14 @@ function draw() {
             }
         }
     }
-    noLoop();
+
+    capturer.capture(p5Canvas.canvas);
+
+    if (frameCount === 10000) {
+        noLoop();
+        capturer.stop();
+        capturer.save();
+    }
 }
 
 function drawLines(newVector) {
@@ -271,11 +291,12 @@ function whatConfiguration(xNewVector, yNewVector) { //return the actual configu
 // -------------------
 
 function setup() {
-    //alert("This is a production trial of P-18 in instant reproduction: it works but is not the best result we have. Thank you :)")
-
-    p6_CreateCanvas()
+    p5Canvas = createCanvas(64, 64);
+    frameRate(5);
+    //p6_CreateCanvas()
 }
 
-function windowResized() {
+/*function windowResized() {
     p6_ResizeCanvas()
 }
+*/

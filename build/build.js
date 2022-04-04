@@ -1,10 +1,10 @@
 var gui = new dat.GUI();
 var params = {
     Seed: 1,
-    Repetition_probability: 0.5,
-    Lines_nb: 100,
-    Arrangement: 20,
-    Max_norm: 200,
+    Repetition_probability: 1,
+    Lines_nb: 20,
+    Arrangement: 5,
+    Max_norm: 20,
     Padding: 0,
     invertedColor: true,
     Download_Image: function () { return save(); },
@@ -20,6 +20,14 @@ gui.add(params, "Arrangement", 1, 30, 1).onChange(function () { return draw(); }
 gui.add(params, "Max_norm", 10, 250, 10).onChange(function () { return draw(); });
 gui.add(params, "Padding", 0, 200, 10).onChange(function () { return draw(); });
 gui.add(params, "Inverse_color").onChange(function () { return draw(); });
+var capturer = new CCapture({
+    framerate: 5,
+    format: "png",
+    name: "exportHorizontalLines",
+    quality: 100,
+    verbose: true,
+});
+var p5Canvas;
 var current;
 var plotter;
 var rectangle;
@@ -38,8 +46,8 @@ var Plotter = (function () {
     function Plotter() {
         this.x = 0;
         this.y = 0;
-        this.deltaX = 0;
-        this.deltaY = 0;
+        this.deltaX = 1;
+        this.deltaY = 1;
         this.mode = 0;
     }
     Plotter.prototype.render = function () {
@@ -48,13 +56,13 @@ var Plotter = (function () {
                 point(this.x, this.y);
                 break;
             case 1:
-                line(this.x, this.y + 5, this.x, this.y - 5);
+                line(this.x, this.y + 1, this.x, this.y - 1);
                 break;
             case 2:
-                line(this.x - 5, this.y, this.x + 5, this.y);
+                line(this.x - 1, this.y, this.x + 1, this.y);
                 break;
             case 3:
-                line(this.x, this.y, this.x + 10, this.y);
+                line(this.x, this.y, this.x + 2, this.y);
                 break;
         }
     };
@@ -78,8 +86,9 @@ var Plotter = (function () {
     return Plotter;
 }());
 function draw() {
+    if (frameCount === 1)
+        capturer.start();
     plotter = new Plotter();
-    randomSeed(params.Seed);
     current = createVector(random(params.Padding, width - params.Padding), random(params.Padding, height - params.Padding));
     background((params.invertedColor ? "black" : "white"));
     var counter = 0;
@@ -124,6 +133,7 @@ function draw() {
                     }
                     break;
                 case 'oblique':
+                    randomNorm = (randomNorm === 0) ? random(0, params.Max_norm) : randomNorm;
                     xNewVector = (configurationOblique === 'x') ? -randomNorm * plotter.deltaX : randomNorm * plotter.deltaX;
                     yNewVector = (configurationOblique === 'y') ? -randomNorm * plotter.deltaY : randomNorm * plotter.deltaY;
                     break;
@@ -162,7 +172,7 @@ function draw() {
             randomLengthOpposite = params.Arrangement * floor(random(10, (params.Max_norm)) / params.Arrangement);
             if (random(1) < params.Repetition_probability) {
                 repetition = true;
-                repetitionNumber = random([4, 5, 6, 7]);
+                repetitionNumber = random([2, 3, 4]);
                 if (configuration === 'oblique') {
                     configurationOblique = random(['x', 'y']);
                     plotter.mode = random([0, 0, 0, 3]);
@@ -170,7 +180,12 @@ function draw() {
             }
         }
     }
-    noLoop();
+    capturer.capture(p5Canvas.canvas);
+    if (frameCount === 10000) {
+        noLoop();
+        capturer.stop();
+        capturer.save();
+    }
 }
 function drawLines(newVector) {
     plotter.deltaX = (newVector.x === 0) ? 0 : (abs(newVector.x)) / newVector.x;
@@ -203,10 +218,8 @@ function whatConfiguration(xNewVector, yNewVector) {
     return configuration;
 }
 function setup() {
-    p6_CreateCanvas();
-}
-function windowResized() {
-    p6_ResizeCanvas();
+    p5Canvas = createCanvas(64, 64);
+    frameRate(5);
 }
 var __ASPECT_RATIO = 1;
 var __MARGIN_SIZE = 25;
