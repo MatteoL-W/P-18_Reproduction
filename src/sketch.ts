@@ -5,8 +5,8 @@
 const gui = new dat.GUI()
 const params = {
     Seed: 1,
-    Repetition_probability: 1,
-    Lines_nb: 20,
+    Repetition_probability: 0.2,
+    Lines_nb: 10,
     Arrangement: 5,
     Max_norm: 20,
     Padding: 0,
@@ -77,13 +77,14 @@ class Plotter {
     render() {
         switch (this.mode) {
             case 0 : //default -> point
-                point(this.x, this.y)
+                //point(this.x, this.y)
+                line(this.x-1, this.y-1, this.x+1, this.y+1);
                 break;
             case 1 : //1 -> vertical line
-                line(this.x, this.y + 1, this.x, this.y - 1);
+                line(this.x, this.y + 2, this.x, this.y - 2);
                 break;
             case 2 : //2 -> horizontal line
-                line(this.x - 1, this.y, this.x + 1, this.y);
+                line(this.x - 2, this.y, this.x + 2, this.y);
                 break;
             case 3 : //2 -> horizontal line for oblique
                 line(this.x, this.y, this.x + 2, this.y);
@@ -233,7 +234,7 @@ function draw() {
 
             if (random(1) < params.Repetition_probability) {
                 repetition = true;
-                repetitionNumber = random([2, 3, 4]);
+                repetitionNumber = random([2, 3]);
                 if (configuration === 'oblique') {
                     configurationOblique = random(['x','y'])
                     plotter.mode = random([0, 0, 0, 3])
@@ -244,7 +245,7 @@ function draw() {
 
     capturer.capture(p5Canvas.canvas);
 
-    if (frameCount === 10000) {
+    if (frameCount === 30000) {
         noLoop();
         capturer.stop();
         capturer.save();
